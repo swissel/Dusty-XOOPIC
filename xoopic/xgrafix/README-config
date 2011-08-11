@@ -1,0 +1,5 @@
+Developers may have to run some of the configure tools when,
+e.g., they add new files.  At this time, do
+
+  automake -include-deps
+  autoconf

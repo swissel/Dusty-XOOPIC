@@ -1,0 +1,173 @@
+
+# To install in a certain directory,
+# say "make install DESTDIR=dir" after making all.
+#
+# look in the Imake.tmpl for the various system-defined symbols...
+
+# *******************************************
+# This begins the user configurable options
+# *******************************************
+
+DESTDIR = /usr
+
+# try cc on DEC ALPHAs running OSF
+CC = gcc
+CCLINK = $(CC)
+AR = ar clq
+RANLIB = ranlib
+RM = rm -f
+
+# try installbsd if install fails
+INSTALL = install
+INSTALLFLAGS = -c
+INSTPGMFLAGS =
+INSTBINFLAGS = -m 0755
+INSTUIDFLAGS = -m 4755
+INSTLIBFLAGS = -m 0644
+INSTINCFLAGS = -m 0444
+INSTMANFLAGS = -m 0444
+INSTDATFLAGS = -m 0444
+INSTKMEMFLAGS = -g kmem -m 2755
+INSTAPPFLAGS = $(INSTDATFLAGS)
+
+# Location where the XGrafix tree should be installed relative to
+# DESTDIR
+XGPATH = /lib/xgrafix
+
+# Comment this definition if the XPM library does not exist on your
+# system
+XPM_DEFINE = -DXPMENABLED
+
+# Location where tcl.h can be found
+TCL_H = /usr/local/include
+
+# Location where tk.h can be found
+TK_H = /usr/local/include
+
+# Location where X11 subtree of include files can be found
+X_H = /usr/include/X11
+
+# This TOP is for IBM AIX systems and may be different on your system.
+# Change it as appropriate to point to where the X tree lives. This is
+# the directory that should contain the config and util directories
+# TOP = /usr/lpp/X11/Xamples
+
+# **********************************************
+# This ends the user configurable options.
+# Please do not edit the stuff past this point
+# **********************************************
+
+DESTDIR = /usr
+CDEBUGFLAGS = -O2
+
+# Change to your system
+#SYSTEM_DEFINES= -DSUN
+
+FILE_EXT=
+
+LIBCOBJS = 	xgcrosshair.o xginitc.o xginitvar.o xgpaint2d.o xgpaint3d.o \
+		xgpaintvec.o xgpixmap.o xgprint.o xgsetup.o xgcommands.o \
+		xgreadrit.o xgrescale.o xgprintgif.o
+
+PS6TO1OBJS =	ps6to1.o
+
+DEFINES = ${SYSTEM_DEFINES} ${XPM_DEFINE}
+
+EXTRA_INCLUDES = -I$(TCL_H) -I$(TK_H) -I$(X_H)
+EXTRA_DEFINES  = -DXGTCL=\"$(DESTDIR)$(XGPATH)\"
+
+CFLAGS = $(CDEBUGFLAGS) $(EXTRA_DEFINES) $(EXTRA_INCLUDES) $(XPM_DEFINE) -I$(TK_H) -I$(X_H) -I$(TCL_H) $(SYSTEM_DEFINES)
+
+all::	ps6to1$(FILE_EXT)
+
+ps6to1$(FILE_EXT):  $(PS6TO1OBJS)
+	$(RM) $@
+	$(CCLINK) -o $@ $(LDOPTIONS)  $(PS6TO1OBJS)   $(LDLIBS)   $(EXTRA_LOAD_FLAGS)
+
+clean::
+	$(RM) ps6to1$(FILE_EXT)
+
+install:: ps6to1$(FILE_EXT)
+	@if [ -d $(DESTDIR)/bin ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)/bin); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTPGMFLAGS)  ps6to1$(FILE_EXT) $(DESTDIR)/bin/ps6to1$(FILE_EXT)
+
+all:: libXGC20$(FILE_EXT).a
+
+libXGC20$(FILE_EXT).a:  $(LIBCOBJS)
+	$(RM) $@
+	$(AR) $@  $(LIBCOBJS)
+	$(RANLIB) $@
+	$(_NULLCMD_)
+
+install:: libXGC20$(FILE_EXT).a
+	@if [ -d $(DESTDIR)$(XGPATH) ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)$(XGPATH)); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) libXGC20$(FILE_EXT).a $(DESTDIR)$(XGPATH)
+	$(RANLIB) $(RANLIBINSTFLAGS) $(DESTDIR)$(XGPATH)/libXGC20$(FILE_EXT).a
+
+install:: xgrafix.h
+	@if [ -d $(DESTDIR)/include ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)/include); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) xgrafix.h $(DESTDIR)/include/xgrafix.h
+
+install:: xgrafix.ico
+	@if [ -d $(DESTDIR)$(XGPATH) ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)$(XGPATH)); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) xgrafix.ico $(DESTDIR)$(XGPATH)/xgrafix.ico
+
+install:: xgsetup.tcl
+	@if [ -d $(DESTDIR)$(XGPATH) ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)$(XGPATH)); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) xgsetup.tcl $(DESTDIR)$(XGPATH)/xgsetup.tcl
+
+install:: xginit.tcl
+	@if [ -d $(DESTDIR)$(XGPATH) ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)$(XGPATH)); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) xginit.tcl $(DESTDIR)$(XGPATH)/xginit.tcl
+
+install:: xgdialogs.tcl
+	@if [ -d $(DESTDIR)$(XGPATH) ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)$(XGPATH)); fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) xgdialogs.tcl $(DESTDIR)$(XGPATH)/xgdialogs.tcl
+
+# -----------------------------------------------------------------------
+# common rules for all Makefiles - do not edit
+
+.c.i:
+	$(RM) $@
+	$(CC) -E $(CFLAGS) $(_NOOP_) $*.c > $@
+
+emptyrule::
+
+clean::
+	$(RM_CMD) *.CKP *.ln *.BAK *.bak *.o core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut  "#"*
+
+Makefile::
+	-@if [ -f Makefile ]; then set -x; \
+	$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \
+	else exit 0; fi
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR)
+
+tags::
+	$(TAGS) -w *.[ch]
+	$(TAGS) -xw *.[ch] > TAGS
+
+# -----------------------------------------------------------------------
+# empty rules for directories that do not have SUBDIRS - do not edit
+
+install::
+	@echo "install in $(CURRENT_DIR) done"
+
+install.man::
+	@echo "install.man in $(CURRENT_DIR) done"
+
+Makefiles::
+
+includes::
+
+depend::
+
+# -----------------------------------------------------------------------
+# dependencies generated by makedepend
+

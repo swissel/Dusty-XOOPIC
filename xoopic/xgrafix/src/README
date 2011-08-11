@@ -1,0 +1,61 @@
+
+
+ALPHA Release of XGrafix Version 2.20 for Tk4.0/Tk4.1 with Fortran Port
+-----------------------------------------------------------------------
+
+This is the source code for compiling XGrafix with the tk4.0 library (and
+tcl7.4 or higher).  The tk4.0 release is not fully compatible with
+previous releases and this required some revision of XGrafix.  This
+library generated here is intended for use with tk4.0  (or higher).
+It will NOT WORK if it is linked with previous versions of tk.
+
+NOTES for Version 2.40 with Fortran Port
+----------------------------------------
+
+-The XGrafix library has been renamed to libXGC240.a.
+
+-The Fortran interface library is named libXGF220.a. Use this library
+ and the XGrafix C library libXGC220.a when compiling Fortran programs
+ with XGrafix.
+
+ Depending on your system, you may need additional Fortran libraries and
+ Fortran compilation flags. This is because the implementation of the
+ Fortran procedure "getarg" is system-dependent. For example, Suns need
+ the library libF77.a while HP's need the flag +U77 and the library 
+ libU77.a. For more information, do a "man getarg" on your system.
+ We have tried to put the correct Fortran flags in the Imakefile.
+ But Please edit the Imakefile (or Makefile.xgrafix) if the FFLAGS 
+ parameter is incorrect for your system. Hopefully this will not be
+ necessary.
+
+-The default destination for the install is /usr/local/lib/xgrafix.
+
+-Titles of diagnostic windows must be unique
+
+-The PS print option has been replaced with an EPS print option.
+
+NOTES for Version 2.50 with Fortran Port
+----------------------------------------
+
+- Library has been renamed to libXGC250.a
+
+- Fortran interface library is now libXGF250; it now functions with 
+libXGC250.a
+
+- The Fortran version builds a C/C++ linkable libXGC250.a, so that 
+both C and Fortran versions can be used simultaneously. This gives 
+Fortran users capabilities such as EPS files and all other version 
+2.50 capabilities availlable to C/C++ users.
+
+- tcl/tk: more recent versions of tcl/tk than 7.5/4.1 should work properly when 
+using the the TCL_TK_DEFINES = -DTcl75_Tk41 define in the Imakefile, including 
+Tcl/Tk version 8.0.
+
+NOTES for Version 2.70
+----------------------
+XGRead(...) and XGWrite(...) are found in xgio.h
+
+Known BUGS
+----------
+
+- 3D crosshairs are occasionally non-responsive

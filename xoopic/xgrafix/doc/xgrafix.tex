@@ -1,0 +1,670 @@
+\documentstyle[12pt]{article}
+\pagestyle{plain}
+\topmargin -0.60in
+\oddsidemargin 0.0625in
+\textheight 9.00in
+\textwidth 6.50in
+\renewcommand{\baselinestretch}{1.4}
+\parskip 0.10in
+
+\begin{document}
+
+\begin{center}
+\Large
+{\bf XGrafix library} \\
+Version 2.0
+\\
+\large
+V. Vahedi, P. Mirrashidi, D. K. Wong, and J. P. Verboncoeur \\
+{\em University of California, Berkeley}
+\end{center}
+
+\normalsize
+XGrafix is a windowing environment for interactive display of
+results from any temporally evolving simulation of a physical
+system.  XGrafix is distributed in library format by the University
+of California Office of Technology Licensing, Berkeley California.
+The source codes to the libraries are also distributed separately
+by the Office of Technology Licensing.  The README file with the
+source code describes how to compile the XGrafix library using
+the distributed makefile.  Before running make, the flags and
+variables in the makefile must be defined. After compiling XGrafix,
+the makefile builds libraries which can be left in the XGrafix
+directory or installed in {\bf /usr/lib}.  Two header files are
+included in the distribution, only one of which is to be included
+in the physics modules.  The file xgrafix.h contains function prototypes
+and variable definitions that may be needed.  The other header file, 
+xgrafixint.h, is used only to compile XGrafix and is not needed by 
+the physics modules.
+
+Another directory called {\bf ctest} is also
+distributed with the XGrafix library to demonstrate how to use
+XGrafix with C compilers. We will
+describe the usage of XGrafix using the example in the {\bf ctest}
+directory.
+
+Another directory called {\bf ftest} is also distributed to
+demonstrate how to use XGrafix with Fortran compilers. 
+The usage of XGrafix with Fortran compilers is very similar
+to its usage with C compilers. First follow the
+explanation of the example given in {\bf ctest} before
+trying the example in {\bf ftest}. When compiling Fortran programs with
+the XGrafix libraries you will need the file {\bf extra.c} provided in {\bf ftest}.
+Also, Depending on your system additional Fortran compilation flags and Fortran
+libraries may be needed. This is because the implementation of the Fortran 
+procedure $getarg()$ is system-dependent. For example, Sun machines will require
+the library libF77.a while HP machines will require the compilation flag +U77 and
+the library libU77.a. For more information, do a ``man getarg'' on your system. 
+
+The XGrafix function calls in Fortran are nearly identical to those in C, 
+except the functions are all in lowercase. For each C Xgrafix function,
+there is a corresponding Fortran function which takes virtually identical
+parameters. There are a few exceptions to this rule:
+
+\begin{enumerate}
+\item Unlike the C Function $XGInit()$, the Fortran function $xginit()$ 
+has only one parameter: the time.
+
+\item A Fortran equivalent is provided for $XGStructureArray()$ but not for
+$XGStructure()$ because $XGStructureArray()$
+does the same thing as $XGStructure()$ but with parameters which
+are more compatible with Fortran. Also, in the Fortran version of
+$XGStructureArray()$, the  parameters FILLED, HOLLOW are replaced
+by the integers 0,1 respectively.
+
+\item Fortran equivalents are provided for $XGCurve()$, $XGVector()$, $XGSurf()$ and \\ 
+$XGIRSurf()$ but not for $XGCurveVector()$, $XGVectorVector()$,
+$XGSurfVector()$ and $XGIRSurfVector()$. This is because the latter set of functions 
+are used only when plotting 
+data structures specific to C and not relevant to Fortran.
+
+\item The Fortran functions $xgvector()$, $xgsurf()$, $xgirsurf()$ 
+and $xgcont()$ are nearly identical to their C counterparts except that they 
+take on two additional parameters: The dimensions of the 2D array they are 
+passing. These should be inserted right before the "color" parameter.  
+
+\item Instead of using the C function $SetupNewVar()$ to set up variables which can be 
+changed dynamically by XGrafix, use the functions $setupnewint(integer, string)$, \\
+$setupnewreal(real, string)$, $setupnewdouble(double precision, string)$, and \\
+$setupnewchar(character, string)$. In each case,
+``string'' is the label XGrafix will associate with the dynamic variable. 
+Like $SetupNewVar()$, these functions must be called before $XGStart()$.
+\end{enumerate}
+For more information on the Fortran Xgrafix functions, read the comments in the file \\
+{\bf xgfinterface.f} in the {\bf src} directory.
+For usage of these functions, see the file {\bf test.f} in the {\bf ftest} directory.
+
+XGrafix allows the application to initialize plotting windows for
+displaying data.  All the arrays to be plotted must remain defined for
+the duration of the simulation run.  XGrafix is initialized by calling
+the {\em XGInit} () function before any plots can be set up.  In the
+test example, the call to {\em XGinit} () appears in the function {\em
+InitWindows} () which precedes the main event loop.  Definitions of
+{\em XGInit} () and other XGrafix functions will appear at the end of
+this document.  After XGrafix is initialized, subsequent calls to {\em
+XGSet2D} (), {\em XGSet2DC} (), {\em XGSetVec} (), and {\em XGSet3D}
+() initialize the appropriate plotting windows.  In the sample, these
+functions are called in the {\em InitWindows} () function.  After a 2D
+plotting window is initialized with a call to {\em XGSet2D} () the
+application can request multiple graphs in the plotting window by
+successive calls to {\em XGCurve} (), {\em XGCurveVector} () and/or {\em
+XGScat2D} ().  This version of
+XGrafix supports only one graph in any 3D plotting window set up by
+{\em XGSet3D} ().
+
+\newpage
+Simulations of physical systems which evolve in time, typically have
+a time loop in which various physics module are called and the
+time step and various data arrays are updated.  XGrafix automatically handles
+this loop and updates the physics and graphics.  An {\em XGMainLoop} () 
+procedure needs to be supplied, which would update variables as needed for 
+each iteration.  A call to {\em XGStart} () after all the initializations
+are done will enter this loop and take over.
+The functions listed below are XGrafix routines to
+initialize the environments and set up windows for diagnostics.
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+{\em XGInit} ($argc$, $argv$, $t$) \\
+int $argc$; /* Number of arguments passed to the $main$ () */\\
+char *$argv$ [ ]; /* Array of char pointers to list of input parameters on command line */ \\
+double *$t$;  /* a pointer to the time variable */
+\end{flushleft}
+This function must be called to initialize XGrafix before any other XGrafix routine is
+called.  The parameters $argv$ and $argc$ are the standard parameters passed to
+$main$ () at the command line.  The pointer to the time variable $t$ is 
+used by XGrafix to display the simulation time.  XGrafix uses argv[0] to 
+obtain the name of the executable program.  XGrafix also allows for several command line options.  The $-h$ option will output a list of other supported options:
+
+\begin{tabbing}
+\verb+    +\=$-d$ $dumpfile[.dmp]$: \verb+ +\=Specify dump file name. Default is output.dmp \\
+\>$-dp$ $n$:\>Dump every $n$ steps. Default is 0 (no periodic dumps) \\
+\>$-h$:\>This help message \\
+\>$-i$ $inputfile[.inp]$:\>Specify input file name. Default is no input file \\
+\>$-nox$:\>Run without X \\
+\>$-p$ $psfile[.ps]$:\>Specify ps file name. Default is output.ps \\
+\>$-s$ $n$:\>Run for $n$ steps. Default is 0 (run forever) \\
+\>$-u$ $n$:\>Run $n$ XGMainLoops every graphics update.  Default is 1. \\
+\end{tabbing}
+
+\newpage
+After the call to XGInit, several variables will be available to the physics 
+module.  These are:
+
+\begin{tabbing}
+\verb+    +\=int\verb+    +\=$theRunWithXFlag$\verb+    +\=FALSE if $-nox$ is given, TRUE otherwise \\
+\>int\>$theNumberOfSteps$\>The number of steps simulation will run, 0 if forever \\
+\>int\>$theCurrentStep$\>The current step in the simulation \\
+\>int\>$theDumpPeriod$\>The number of steps between automatic dumps \\
+\>int\>$WasDumpFileGiven$\>TRUE if $-d$ option is given, FALSE otherwise \\
+\>int\>$WasInputFileGiven$\>TRUE if $-i$ option is given, FALSE otherwise \\
+\>char *\>$theCodeName$\>The name of the physics executable, same as argv[0] \\
+\>char *\>$theInputFile$\>The name of the input file \\
+\>char *\>$theDumpFile$\>The name of the dump file \\
+\>char *\>$theEPSFile$\>The name of the encapsulated postscript file
+\end{tabbing}
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+$XGSet2D$($PlotType$, $X\_Label$, $Y\_Label$, $State$, $ulx$, $uly$, $X\_Scale$, $Y\_Scale$, \\
+\hspace{.8in} $X\_Auto\_Rescale$, $Y\_Auto\_Rescale$, $X\_Min$, $X\_Max$, $Y\_Min$, $Y\_Max$) \\
+char  *$PlotType$;         /* ``linlin'', ``linlog'', ``loglog'', or ``loglin'' */ \\
+char  *$X\_Label$;         /* x label for the frame                            */ \\
+char  *$Y\_Label$;         /* y label for the frame                            */ \\
+char  *$State$;            /* ``open'' or ``closed''                           */ \\
+int    $ulx$, $uly$;       /* requested position of frame's upper left corner   */ \\
+SCALAR  $X\_Scale$;         /* scaling factor for the x array                   */ \\
+SCALAR  $Y\_Scale$;         /* scaling factor for the y array                   */ \\
+int    $X\_Auto\_Rescale$; /* if True $X\_Min$ and $X\_Max$ are ignored       */ \\
+int    $Y\_Auto\_Rescale$; /* if True $Y\_Min$ and $Y\_Max$ are ignored       */ \\
+SCALAR  $X\_Min$, $X\_Max$; /* x bounds for the plot if $X\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Y\_Min$, $Y\_Max$; /* y bounds for the plot if $Y\_Auto\_Rescale$ is False  */ 
+\end{flushleft}
+
+{\em XGSet2D} () initializes a plotting frame for a 2D plot.  The plot type is passed 
+as a character string and can be one of the four strings defined in the comments.  If
+$PlotType$ is defined as ``linlog,'' the $x$ axis will have a linear scale, and the $y$
+axis will have a logarithmic scale.  Note that when the $x$ and/or $y$ axes are set to have
+a logarithmic scale, XGrafix WILL take the logarithm of the data along that axis.
+The name of the X-Windows frame, which appears as a window on the display will be
+the same $Y\_Label$.  The $State$ parameter (``open'' or ``closed'') defines the
+initial state of the window; if ``closed,''
+the window will initially be hidden.  If the flag $X\_Auto\_Rescale$ is
+set to zero (False), XGrafix uses $X\_Min$ and $X\_Max$ as the plot limits on the $x$
+axis in the plotting window.  If $X\_Auto\_Rescale$ is not False, set to 1, XGrafix will
+scan the whole $x$ data array to find the maximum and the minimum of each plot.  The 
+same is true for the parameters pertaining to $y$ axis.  Note that, {\em XGSet2D} ()
+only sets up a 2D frame, and does not have any information about the data arrays which
+are to be plotted in this frame.  A call to {\em XGSet2D} () must be followed by at
+least one call to $XGCurve$ (), $XGCurveVector$ () or $XGScat2D$ () .  Multiple calls to $XGCurve$ (), $XGCurveVector$ ()  
+and/or $XGScat2D$ () result in multiple graphs in that plotting frame. The integers
+$ulx$ and $uly$ define the initial position of frame's upper left corner.  The default
+size of a 2D frame is 300 by 400 pixels which can be resized at run time.
+
+\begin{flushleft}
+$XGCurve$($x\_array$, $y\_array$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+int     *$npoints$;    /* number of points in the x (and y) direction    */ \\
+int      $color$;      /* plot color chosen from 0-9                   */
+\end{flushleft}
+
+\begin{flushleft}
+$XGCurveVector$($x\_array$, $y\_array$, $npoints$, $color$, $x\_size$,
+$x\_offset$, $y\_size$, $y\_offset$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+int     *$npoints$;    /* number of points in the x (and y) direction    */ \\
+int      $color$;      /* plot color chosen from 0-9 			*/ \\
+int      $x\_size$;      /* number of SCALARs in the stucture which
+contains the x data	*/ \\
+int      $x\_offset$;      /* number of SCALARs preceding the x field
+in the structure containing the x data		*/ \\
+int      $y\_size$;      /* number of SCALARs in the structure which
+	contains the y data*/ \\
+int      $y\_offset$;      /* number of SCALARs preceding the y field
+ in the structure containing the y data*/
+\end{flushleft}
+
+\begin{flushleft}
+$XGScat2D$($x\_array$, $y\_array$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                          */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                          */ \\
+int     *$npoints$;    /* number of points in the x (and y) direction    */ \\
+int      $color$;      /* plot's color chosen from 0-9                   */
+\end{flushleft}
+
+These functions add a curve to an existing plotting frame.  Each call
+to $XGCurve$(), $XGCurveVector$ ()  or $XGScat2D$() associates the curve or scatter plot
+with the plot frame corresponding to the preceding call to $XGSet2D$().
+Note that each frame can contain one or more curves or scatter plots, in
+any combination.
+
+{\bf Note} that the $x\_array$, $y\_array$, and $npoints$ are shared memory.
+Therefore, once the pointers have been passed, these memory must not be freed
+or moved until program termination. 
+
+{\bf Also note} that ``SCALAR'' is set to either ``float'' or
+``double'' during the compilation of XGrafix.  It is defined in the
+files xgrafix.h and xgdatamacros.h.
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+$XGSetVec$($PlotType$, $X\_Label$, $Y\_Label$, $State$, $ulx$, $uly$, $X\_Scale$, $Y\_Scale$, \\
+\hspace{.8in} $X\_Auto\_Rescale$, $Y\_Auto\_Rescale$, $X\_Min$, $X\_Max$, $Y\_Min$, $Y\_Max$) \\
+char  *$PlotType$;         /* only ``vecvec'' is permitted*/ \\
+char  *$X\_Label$;         /* x label for the frame                            */ \\
+char  *$Y\_Label$;         /* y label for the frame
+*/ \\
+char  *$Z\_Label$;           /* z label for the frame (name of vectors)                            */ \\
+char  *$State$;            /* ``open'' or ``closed''                           */ \\
+int    $ulx$, $uly$;       /* requested position of frame's upper left corner   */ \\
+SCALAR  $X\_Scale$;         /* scaling factor for the x array                   */ \\
+SCALAR  $Y\_Scale$;         /* scaling factor for the y array                   */ \\
+int    $X\_Auto\_Rescale$; /* if True $X\_Min$ and $X\_Max$ are ignored       */ \\
+int    $Y\_Auto\_Rescale$; /* if True $Y\_Min$ and $Y\_Max$ are ignored       */ \\
+SCALAR  $X\_Min$, $X\_Max$; /* x bounds for the plot if $X\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Y\_Min$, $Y\_Max$; /* y bounds for the plot if $Y\_Auto\_Rescale$ is False  */ 
+\end{flushleft}
+
+This functions sets up a vector plot, and is otherwise similar to
+$XGSet2D$().  The additional parameter $Z\_Label$ is described above.
+Note that $PlotType$ must be set to ``vecvec''.
+
+A call to $XGSetVec$() must be followed by one and only one call to either
+$XGVector$() or $XGVectorVector$().
+
+\begin{flushleft}
+$XGVector$($x\_array$, $y\_array$, $x\_component\_data$,
+$y\_component\_data$, $mpoints$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x position array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y positionarray to be plotted
+*/ \\
+SCALAR	**$x\_component\_data$;	/* x component of vectors	*/ \\
+SCALAR	**$y\_component\_data$;	/* y component of vectors	*/ \\
+int     *$mpoints$;    /* number of points in the x direction    */ \\
+int     *$npoints$;    /* number of points in the y direction    */ \\
+int      $color$;      /* plot color chosen from 0-9                   */
+\end{flushleft}
+
+\begin{flushleft}
+$XGVectorVector$($x\_array$, $y\_array$, $x\_component\_data$,
+$y\_component\_data$, $mpoints$, $npoints$, $color$, $x\_size$,
+$x\_offset$, $y\_size$, $y\_offset$, $x\_component\_size$,
+$x\_component\_offset$, $y\_component\_size$, $y\_component\_offset$ ) \\
+SCALAR   *$x\_array$;    /* x position array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y position array to be plotted
+*/ \\
+SCALAR	**$x\_component\_data$;	/* x component of vectors	*/ \\
+SCALAR	**$y\_component\_data$;	/* y component of vectors	*/ \\
+int     *$mpoints$;    /* number of points in the x direction    */ \\
+int     *$npoints$;    /* number of points in the y direction    */ \\
+int      $color$;      /* plot color chosen from 0-9
+*/ \\
+int      $x\_size$;      /* number of SCALARs in the stucture which
+contains the x position data	*/ \\
+int      $x\_offset$;      /* number of SCALARs preceding the x field
+in the structure containing the x position data		*/ \\
+int      $y\_size$;      /* number of SCALARs in the structure which
+contains the y position data*/ \\
+int      $y\_offset$;      /* number of SCALARs preceding the y field 
+in the structure containing the y position data*/ \\
+int      $x\_component\_size$;      /* number of SCALARs in the stucture which
+contains the x component data	*/ \\
+int      $x\_component\_offset$;      /* number of SCALARs preceding the x
+component field in the structure containing the x component data */ \\
+int      $y\_component\_size$;      /* number of SCALARs in the structure which
+contains the y component data */ \\
+int      $y\_component\_offset$;      /* number of SCALARs preceding the y
+component field in the structure containing the y component data */
+\end{flushleft}
+
+As in the case of $XGCurve$ (), $XGCurveVector$ () and $XGScat2D$ ()
+these functions acquire data via shared memory.  Once the pointers
+have been sent, the memory arrays must not be moved or freed until
+program termination.  Note, however, that only one plot per frame is
+allowed for three-axis plots.
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+$XGSet3D$($PlotType$, $X\_Label$, $Y\_Label$, $Z\_Label$, $Theta$, $Phi$, $State$, $ulx$, $uly$, \\
+\hspace{.8in} $X\_Scale$, $Y\_Scale$, $Z\_Scale$, $X\_Auto\_Rescale$, $Y\_Auto\_Rescale$, \\
+\hspace{.8in} $Z\_Auto\_Rescale$, $X\_Min$, $X\_Max$, $Y\_Min$, $Y\_Max$, $Z\_Min$, $Z\_Max$) \\
+char  *$PlotType$;          /* ``linlinlin'', ``linlinlog'', ``linloglog'', etc. */ \\
+char  *$X\_Label$;           /* x label for the frame                            */ \\
+char  *$Y\_Label$;           /* y label for the frame                            */ \\
+char  *$Z\_Label$;           /* z label for the frame                            */ \\
+SCALAR  $Theta$, $Phi$;       /* initial viewing angles                           */ \\
+char  *$State$;             /* ``open'' or ``closed''                            */ \\
+int    $ulx$, $uly$;        /* requested position of frame's upper left corner    */ \\
+SCALAR  $X\_Scale$;           /* scaling factor for the x array                   */ \\
+SCALAR  $Y\_Scale$;           /* scaling factor for the y array                   */ \\
+SCALAR  $Z\_Scale$;           /* scaling factor for the z array                   */ \\
+int    $X\_Auto\_Rescale$;    /* if True $X\_Min$ and $X\_Max$ are ingonred      */ \\
+int    $Y\_Auto\_Rescale$;    /* if True $Y\_Min$ and $Y\_Max$ are ignored       */ \\
+int    $Z\_Auto\_Rescale$;    /* if True $Z\_Min$ and $Z\_Max$ are ignored       */ \\
+SCALAR  $X\_Min$, $X\_Max$;    /* x bounds for the plot if $X\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Y\_Min$, $Y\_Max$;    /* y bounds for the plot if $Y\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Z\_Min$, $Z\_Max$;    /* z bounds for the plot if $Z\_Auto\_Rescale$ is False  */
+\end{flushleft}
+
+This functions sets up a three-axis plot frame, and is otherwise similar to
+$XGSet2D$().  Additional parameters described above for the third
+dimension include $Z\_Label$, $Z\_Scale$, $Z\_Auto\_Rescale$, $Z\_Min$ and 
+$Z\_Max$.
+
+The other additional parameters specify the viewing direction for the plot
+frame.  $Theta$ specifies the polar angle (0-180 degrees).  $Phi$ specifies
+the azimuthal angle (0-360 degrees).  There is no perspective available in
+this type of plot.
+
+A call to $XGSet3D$() must be followed by one and only one call to
+either $XGSurf$ (), $XGSurfVector$ () or $XGScat3D$ ().  
+
+\begin{flushleft}
+$XGScat3D$($x\_array$, $y\_array$, $z\_array$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+SCALAR   *$z\_array$;    /* z array to be plotted                         */ \\
+int     *$npoints$;    /* number of points in the x, y and z direction   */ \\
+int      $color$;      /* plot's color chosen from 0-9                   */
+\end{flushleft}
+
+\begin{flushleft}
+$XGSurf$($x\_array$, $y\_array$, $z\_array$, $mpoints$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+SCALAR  **$z\_array$;    /* z array to be plotted                         */ \\
+int     *$mpoints$;    /* number of points in the x direction            */ \\
+int     *$npoints$;    /* number of points in the y direction            */ \\
+int      $color$;      /* plot's color chosen from 0-9                   */
+\end{flushleft}
+
+\begin{flushleft}
+$XGSurfVector$($x\_array$, $y\_array$, $z\_array$, $mpoints$,
+$npoints$, $color$, $x\_size$, $x\_offset$, $y\_size$, $y\_offset$, $z\_size$, $z\_offset$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+SCALAR  **$z\_array$;    /* z array to be plotted                         */ \\
+int     *$mpoints$;    /* number of points in the x direction            */ \\
+int     *$npoints$;    /* number of points in the y direction            */ \\
+int      $color$;      /* plot's color chosen from 0-9
+*/ \\
+int      $x\_size$;      /* number of SCALARs in the stucture which
+contains the x data	*/ \\
+int      $x\_offset$;      /* number of SCALARs preceding the x field
+in the structure containing the x data		*/ \\
+int      $y\_size$;      /* number of SCALARs in the structure which
+	contains the y data*/ \\
+int      $y\_offset$;      /* number of SCALARs preceding the y field
+ in the structure containing the y data*/ \\
+int      $z\_size$;      /* number of SCALARs in the structure which
+	contains the z data*/ \\
+int      $z\_offset$;      /* number of SCALARs preceding the z field
+ in the structure containing the z data*/
+\end{flushleft}
+
+$XGScat3D$() adds a three-axis scatter plot to the plot frame set up by the
+preceding call to $XGSet3D$().  $XGSurf$() and $XGSurfVector$() add a
+three-axis wireframe/surface plot to the plot frame set up by the preceding call to $XGSet3D$().
+
+As in the case of $XGScat2D$(),  $XGCurve$() and $XGCurveVector$(), these functions acquire data
+via shared memory.  Once the pointers have been sent, the memory arrays must
+not be moved or freed until program termination.  Note, however, that only
+one plot per frame is allowed for three-axis plots.
+
+\newpage
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+$XGSet2DC$($PlotType$, $X\_Label$, $Y\_Label$, $Z\_Label$, $State$, $ulx$, $uly$, \\
+\hspace{.8in} $X\_Scale$, $Y\_Scale$, $Z\_Scale$, $X\_Auto\_Rescale$, $Y\_Auto\_Rescale$, \\
+\hspace{.8in} $Z\_Auto\_Rescale$, $X\_Min$, $X\_Max$, $Y\_Min$, $Y\_Max$, $Z\_Min$, $Z\_Max$) \\
+char  *$PlotType$;          /* ``linlinlin'', ``linlinlog'', ``linloglog'', etc. */ \\
+char  *$X\_Label$;           /* x label for the frame                            */ \\
+char  *$Y\_Label$;           /* y label for the frame                            */ \\
+char  *$Z\_Label$;           /* z label for the frame                            */ \\
+char  *$State$;             /* ``open'' or ``closed''                            */ \\
+int    $ulx$, $uly$;        /* requested position of frame's upper left corner    */ \\
+SCALAR  $X\_Scale$;           /* scaling factor for the x array                   */ \\
+SCALAR  $Y\_Scale$;           /* scaling factor for the y array                   */ \\
+SCALAR  $Z\_Scale$;           /* scaling factor for the z array                   */ \\
+int    $X\_Auto\_Rescale$;    /* if True $X\_Min$ and $X\_Max$ are ignored      */ \\
+int    $Y\_Auto\_Rescale$;    /* if True $Y\_Min$ and $Y\_Max$ are ignored       */ \\
+int    $Z\_Auto\_Rescale$;    /* if True $Z\_Min$ and $Z\_Max$ are ignored       */ \\
+SCALAR  $X\_Min$, $X\_Max$;    /* x bounds for the plot if $X\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Y\_Min$, $Y\_Max$;    /* y bounds for the plot if $Y\_Auto\_Rescale$ is False  */ \\
+SCALAR  $Z\_Min$, $Z\_Max$;    /* z bounds for the plot if $Z\_Auto\_Rescale$ is False  */
+\end{flushleft}
+
+This function creates a two-axis contour plot.  The parameters for this 
+function are similar to those of $XGSet3D$(), with the exception that 
+$XGSet2DC$() does not need viewing angles.
+
+A call to $XGSet2DC$() must be followed by one and only one call to $XGCont$()
+to add the contour plot to the frame.
+
+\newpage
+\begin{flushleft}
+$XGCont$($x\_array$, $y\_array$, $z\_array$, $mpoints$, $npoints$, $color$) \\
+SCALAR   *$x\_array$;    /* x array to be plotted                         */ \\
+SCALAR   *$y\_array$;    /* y array to be plotted                         */ \\
+SCALAR  **$z\_array$;    /* z array to be plotted                         */ \\
+int     *$mpoints$;    /* number of points in the x direction            */ \\
+int     *$npoints$;    /* number of points in the y direction            */ \\
+int      $color$;      /* plot's color chosen from 0-9                   */
+\end{flushleft}
+
+This function adds a two-axis contour plot to the contour plot frame 
+specified in the preceding call to $XGSet2DC$().  Note that only one
+contour plot can be associated with each contour plot frame.
+
+$XGCont$() uses shared memory to acquire its data.  Once the pointers to the
+data arrays have been passed to this function, the memory must not be moved
+or freed until program termination.
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\begin{flushleft}
+$XGStructure$($numPoints$, $fillFlag$, $lineColor$, $fillColor$, $...$) \\
+int 		$numPoints$;	/* number of pairs of (x,y) coordinates */ \\
+STRUCT\_FILL 	$fillFlag$;	/* FILLED or HOLLOW */ \\
+int		$lineColor$;	/* color of the outline */ \\
+int		$fillColor$;	/* color of the inside */ \\
+SCALAR		$X1, Y1$;	/* first (x,y) pair */ \\
+... \\
+SCALAR		$Xn, Yn$;	/* $numPoints$'th (x,y) pair */
+\end{flushleft}
+
+This function, to be called after a call to either $XGSet2D$() or
+$XGSetVec$(), will set up a structured object with $numPoints$  points.  If the
+first point and the last point are equal, then the object will be
+closed.  Note that this procedure can be called multiple times to
+define disjoint structures.
+\newpage
+\begin{flushleft}
+$XGStructureArray$($numPoints$, $fillFlag$, $lineColor$, $fillColor$, $points$) \\
+int 		$numPoints$;	/* number of pairs of (x,y) coordinates */ \\
+STRUCT\_FILL 	$fillFlag$;	/* FILLED or HOLLOW */ \\
+int		$lineColor$;	/* color of the outline */ \\
+int		$fillColor$;	/* color of the inside */ \\
+SCALAR*		$points$;	/* array containing pairs of points, i.e., $[x_1,y_1,x_2,y_2,...,x_n,y_n]$. */\\
+
+This function is exactly like XGStructure except that you pass in an array
+of points instead of using a variable argument list.
+\end{flushleft}
+
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+\newpage
+Additional functions provided by XGrafix are described below.
+
+\begin{flushleft}
+$XGSet2DFlag$ (), $XGSetVecFlag$ (), $XGSet3DFlag$ () and
+$XGSet2DCFlag$ ()
+\end{flushleft}
+
+These functions are identical to $XGSet2D$ (), $XGSetVec$ (),
+$XGSet3D$ () and $XGSet2DC$ () respectively with the exception that
+the ``Flag'' functions each have one additional parameter at the end
+of their parameter lists which is ``int *$openFlag$''.  This integer
+parameter is set to TRUE by XGrafix whenever the corresponding
+diagnostic window is opened and set to FALSE when it is closed.
+
+\begin{flushleft}
+$SetUpNewVar$($spvar$, $spname$, $type$) \\
+SCALAR  *$spvar$;	/* pointer to variable to be modified  */ \\
+char   *$spname$;	/* name to associate with variable     */ \\
+char   *$type$;		/* ``double'', ``float'', ``integer'', or ``char'' */
+\end{flushleft}
+
+This function, to be called before $XGStart$(), sets up a variable to be 
+modifiable during runtime.  The parameter $spvar$ should be a pointer to 
+the variable.  $spname$ is used to describe the variable, i.e. ``phase shift'' 
+and $type$ specifies the type of variable.
+
+\begin{flushleft}
+$XGRead$($ptr$, $size$, $nitems$, $stream$, $type$) \\
+char *$ptr$, *$type$; \\
+FILE *$stream$;       \\
+int $size$, $nitems$;
+\end{flushleft}
+
+The $XGRead$() function provides a platform-independent version of the 
+standard C library fread function.  The parameters are identical to the those
+of $fread$(); refer to your C library reference for details.  This function
+makes any binary data file transportable to machines regardless of the native
+byte ordering on the machine.  The parameter $type$ is only used on
+UNICOS machines and takes the values ``char'', ``int'', or ``float''
+
+\newpage
+
+\begin{flushleft}
+$XGWrite$($ptr$, $size$, $nitems$, $stream$, $type$) \\
+char *$ptr$, *$type$;  \\
+FILE *$stream$;        \\
+int $size$, $nitems$;
+\end{flushleft}
+
+The $XGWrite$() function provides a platform-independent version of the 
+standard C library fwrite function.  The parameters are identical to the those
+of $fwrite$(); refer to your C library reference for details.  This function
+makes any binary data file transportable to machines regardless of the native
+byte ordering on the machine.The parameter $type$ is only used on
+UNICOS machines and takes the values ``char'', ``int'', or ``float''
+
+\begin{flushleft}
+void $Dump$($filename$) \\
+char *$filename$;
+\end{flushleft}
+
+$Dump$() provides a callback for the application to specify how to save
+the state of the simulation.  This function is supplied by the application, 
+and is called when the OK button is pushed within the dump dialog box.  The
+parameter $filename$ contains the name of the file input in the dump dialog box.
+The application can provide code to write the desired data to the file.  
+Note that any operation can be performed in $Dump$() that returns control
+to XGrafix.  For binary file operations, use of $XGRead$() and $XGWrite$() are 
+recommended for platform independent data files.
+
+\begin{flushleft}
+void $Quit$()
+\end{flushleft}
+
+The $Quit$() function is called when the user selects the Quit button at 
+runtime.  The function must be supplied by the application, and can perform
+an operation required just before exit, such as saving data, etc.
+
+\begin{flushleft}
+int $C\_KillGraphicsProc$()
+\end{flushleft}
+
+The $C\_KillGraphicsProc$() terminates the X display components of a
+simulation leaving the program to iterate the XGMainLoop without
+displaying the control panel or any diagnostic windows.  The function
+is executed by choosing the ``Kill X'' option from the ``Quit'' menu
+or sending the program a ``USR1'' signal with the ``kill'' command.
+The X display may be reactivated by sending the program another
+``USR1'' signal.  In order to restore the X frontend, a file named
+``.xgdisplay'' in the users \$HOME directory containing a display name
+(i.e. my\_machine.universtiy.edu:0) to which the windows will be sent
+must exist.  Of course this machine must give permision for the
+host machine to display X there.
+
+{\bf Warning:} This routine is
+extremely volatile.  It should not be used without first saving the
+state of the simulation.  Also it is not currently supported in XOOPIC.
+
+\def\xlen{4in}
+\begin{minipage}{\xlen}
+\begin{flushright}
+\rule{\xlen}{.5pt}
+\end{flushright}
+\end{minipage}
+
+Key bindings are built into XGrafix to facilitate usage.  In all dialog boxes,
+the {\bf UP ARROW} and {\bf DOWN ARROW} can be used to maneuver between 
+options.  {\bf TAB} will invoke the $Apply$ button (if one exists),
+{\bf RETURN} will invoke the $Ok$ button, {\bf SPACE} will select an On/Off 
+button, and {\bf ESCAPE} will invoke the
+$Cancel$ button.  In the $Diagnostics$ dialog box, {\bf TAB} will start
+a search based on the contents of the entry, {\bf ENTER} will invoke the
+$Ok$ button, and the {\bf UP ARROW}, {\bf DOWN ARROW}, {\bf PAGE UP}, and
+{\bf PAGE DOWN} keys can be used to scroll the listbox.
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,69 @@
+############################
+# Dependencies:
+############################
+building and running xgrafix/xoopic depend on the following headers/libraries/programs:
+    X11, Xpm, Tcl/Tk, gcc, imagemagick, bison
+    
+optional xoopic dependencies:
+    Fortran Compiler for fortran libraries
+    MPI for parallel runs
+    HDF5 for parallel or high performance dump files
+    libpng for png
+    fftw
+    fftw3
+
+
+dependencies can be installed on Ubuntu (or likely any Debian based distro) with the command:
+sudo aptitude install gcc g++ build-essential automake \
+    tk-dev imagemagick bison libx11-dev libxpm-dev libpng-dev \
+    fftw-dev  libfftw3-dev h5utils hdf5-tools libhdf5-serial-*\
+
+the first two lines are necessary, the last installs optional fftw/hdf5 dependencies
+
+On Fedora, these dependencies can be installed with:
+sudo yum install gcc gcc-gfortran gcc-c++ automake libX11-devel libXpm-devel \
+        ImageMagick bison tk-devel libpng-devel \
+        hdf5 hdf5-devel
+
+On SUSE, install the following packages with YAST:
+        gcc gcc-c++ gcc-fortran automake xorg-x11-devel make
+        tk-devel bison libpng-devel imagemagick hdf5 hdf5-devel
+
+
+##################
+# Configure / build/ install
+##################
+For a new install:
+
+edit the run_conf.sh file to match your system.  For a basic install, the only
+thing you are likely to edit is `prefix` - the install location.
+
+then you can do:
+sh run_conf.sh # configure the build
+
+make # build the program
+# or, if you have a multiprocessor machine, this can go faster with:
+make -j 4 #(that's 4 threads, you can do as many or as few as you want)
+
+# If you are building xgrafix, do:
+make install # sudo make install if you need root privileges to write to $prefix/{bin|lib|include}
+
+test the xgrafix build with: 
+./ctest/xtest # from the xgrafix root dir.
+
+Once you have built and installed xgrafix, you can build xoopic. run_conf.sh is the same for
+both xoopic and xgrafix, so if you configured run_conf.sh in xgrafix, use the same one in xoopic.
+
+The process to build xoopic is the same as xgrafix, except skip the 'make install' step, since you only
+need the binary file in 'xg/xoopic'. You can test xoopic with:
+./xoopic -i input/ebeam1a.inp # from the xoopic root dir
+
+once xoopic is done, you can install it with:
+cp xoopic $prefix/bin/
+
+where prefix is defined as in:
+prefix=/usr/local # to install for all users
+or
+prefix=$HOME # to install just for you (assuming ~/bin is already in your path)
+
+

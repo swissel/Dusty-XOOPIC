@@ -1,0 +1,113 @@
+paper1.inp
+{
+dc discharge in argon with a dust particle set grid z=r=80, used to determine these parameters: dt, np2c, sheath length and the reasonable time to observe results.
+}
+Region
+{
+Species
+{ 
+	name = electrons
+	m = 9.11E-31
+	q = -1.6E-19
+	collisionModel=1
+}
+ Species
+{
+	name = argon
+	m = 6.67e-26
+	q = 1.6E-19
+	subcycle = 100
+	collisionModel=2
+}
+Grid 
+{
+J = 80
+x1s = 0.0
+x1f = 0.018
+n1 = 1.0
+K = 80
+x2s = 0.0
+x2f = 0.022
+n2 = 1.0
+}
+Control
+{
+	dt = 2E-10
+	ElectrostaticFlag = 1
+}
+MCC
+{
+gas = Ar 
+pressure = 0.05
+eSpecies = electrons
+iSpecies = argon
+}
+Conductor
+{
+j1 = 80
+k1 = 0
+j2 = 80
+k2 = 80
+    name = Conductor
+normal = −1
+}
+Equipotential
+{
+C = -500
+phase = 0
+j1 = 0
+j2 = 0
+k1 = 0
+k2 = 80
+  name = Equipotential
+normal = 1
+nxbins=30
+nenergybins=30
+energy_min=0
+energy_max = 500
+}
+
+Dielectric
+{
+er = 1.0
+j1 = 0
+j2 = 80
+k1 = 80
+k2 = 80
+  name = Dielectric
+  normal = −1
+}
+CylindricalAxis
+{
+j1 = 0
+k1 = 0
+j2 = 80
+k2 = 0
+normal = 1
+}
+
+Load
+{
+x1MinMKS = 0.000
+x1MaxMKS = 0.018
+x2MinMKS = 0.00
+x2MaxMKS = 0.022
+speciesName = argon
+density = 1.0e15
+np2c = 1.8E6
+temperature = 4.9e2
+}
+
+
+Load
+{
+x1MinMKS = 0.000
+x1MaxMKS = 0.018
+x2MinMKS = 0.00
+x2MaxMKS = 0.022
+speciesName = electrons
+density = 1.0e15
+np2c = 1.8E6
+temperature = 5.93e5
+}
+}

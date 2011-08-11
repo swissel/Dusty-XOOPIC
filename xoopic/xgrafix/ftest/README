@@ -1,0 +1,21 @@
+
+This is a simple template which illustrates how
+one can use xgrafix as a windowing environment for
+viewing diagnostics in real time.  This template
+is in FORTRAN.
+
+1/19/94 VV/PTSG
+
+Depending on your system architecture you may have to make
+some modifications to the libraries and flags used when
+compiling. The reason for this is that the implementation
+of the Fortran procedure "getarg" depends on the system.
+For more information, do a "man getarg" on your system.
+For example, HP machines require the flag +U77 and the 
+library libU77.a while Sun machines require  the
+library libF77.a
+
+For the titles of your graphs, avoid using periods and
+square brackets [] since they conflict with tk functions. 
+
+6/19/96 EK/PTSG

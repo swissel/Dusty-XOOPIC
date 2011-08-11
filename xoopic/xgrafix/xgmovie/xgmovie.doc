@@ -1,0 +1,43 @@
+xgmove
+
+Description:  xgmovie is a program which takes recordings
+from the Xgrafix 2.50 or later library and displays them.
+Recordings are in the .bxg format. 
+Presently, the following sorts of windows can be saved and replayed:
+
+line plots
+2d scatter plots
+Vector plots
+3d plots
+
+Not supported:
+3d irregular plots
+
+The .bxg format saves frames into the file along with the
+simulation time at which the frame is valid.  xgmovie 
+has its own time and timestep though, and can skip frames:  xgmovie
+will display the latest frame for each window which is at <= its
+current time.
+
+Usage:
+xgmovie -i <inputfile>
+
+Where inputfile has the following format:
+
+timestep <max number of elements in a linear array to use>
+filename1 x y
+filename2 x2 y2
+filename3 x3 y3
+.....
+END
+
+Don't include the ".bxg" in the file name.
+
+<max number of elements in a linear array to use>
+is useful when you don't have a lot of memory, but your
+.bxg file saved a LOT of points.  Suppose you
+had 100k points in a .bxg file per frame, but you
+wanted to show only every 10th one.  You'd choose
+<max number of elements in a linear array> to be 10000.
+
+A sample movie is in "sample"

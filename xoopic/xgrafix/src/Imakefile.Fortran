@@ -1,0 +1,164 @@
+#ifndef XCOMM
+#define XCOMM #
+#endif
+
+XCOMM To install in a certain directory,
+XCOMM say "make install DESTDIR=dir" after making all.
+XCOMM
+XCOMM look in the Imake.tmpl for the various system-defined symbols...
+
+XCOMM *******************************************
+XCOMM This begins the user configurable options
+XCOMM *******************************************
+
+DESTDIR = /usr
+
+XCOMM Location where the XGrafix tree should be installed relative to 
+XCOMM DESTDIR
+XGPATH = /local/xgrafix
+
+XCOMM Uncomment the following line (in Imakefile, that is) to build XGrafix
+XCOMM in double precision
+XCOMM #define SCALAR_IS_DOUBLE
+
+XCOMM Comment this definition if the XPM library does not exist on your
+XCOMM system
+XPM_DEFINE = -DXPMENABLED
+
+XCOMM IMPORTANT!!!! Must Define which Tcl/Tk versions are being used.
+XCOMM               Uncomment the appropriate define.
+XCOMM The following define is used for versions of TCL/TK
+XCOMM Versions 7.4/4.0 and earlier.  ALL OTHER versions use the
+XCOMM second define.
+XCOMM TCL_TK_DEFINES = -DTcl74_Tk40
+TCL_TK_DEFINES = -DTcl75_Tk41
+
+XCOMM Location where tcl.h can be found
+TCL_H = /usr/local/include
+
+XCOMM Location where tk.h can be found
+TK_H = /usr/local/include
+
+XCOMM Location where X11 subtree of include files can be found
+X_H = /usr/include/X11
+
+XCOMM This TOP is for IBM AIX systems and may be different on your system. 
+XCOMM Change it as appropriate to point to where the X tree lives. This is 
+XCOMM the directory that should contain the config and util directories
+XCOMM TOP = /usr/lpp/X11/Xamples
+
+XCOMM **********************************************
+XCOMM This ends the user configurable options.
+XCOMM Please do not edit the stuff past this point
+XCOMM **********************************************
+
+CDEBUGFLAGS = -g
+CFLAGS = -O
+
+#ifdef SCALAR_IS_DOUBLE
+FSCALAR = DOUBLE\ PRECISION
+CSCALAR = double
+#else
+FSCALAR = REAL
+CSCALAR = float
+#endif
+
+XCOMM Note that for each architecture the FFLAGS (Fortran compiling
+XCOMM options) depend on the flags and libraries needed when using
+XCOMM the Fortran procedure "getarg". To determine these flags for
+XCOMM your system, do a "man getarg".
+
+#if defined(UltrixArchitecture) || defined(AlphaArchitecture)
+FILE_EXT=
+FFLAGS = -O
+#endif
+
+#ifdef SunArchitecture
+SYSTEM_DEFINES= -DSUN 
+FFLAGS = -O -lF77
+FILE_EXT=
+#endif
+
+#ifdef HPArchitecture
+SYSTEM_DEFINES= -DHP
+FFLAGS = -O +U77 -lU77
+FILE_EXT= 
+#endif
+
+#ifdef CrayArchitecture
+SYSTEM_DEFINES= -DUNICOS
+FILE_EXT= 
+#endif
+
+#ifdef IBMArchitecture
+SYSTEM_DEFINES= -DIBM
+FILE_EXT=
+
+XCOMM The SUBS and special IBM treatment is because AIX doesn't
+XCOMM have all the standard macros from MIT X11R5. 
+
+SUBS= $(DESTDIR)/bin $(DESTDIR)/lib
+
+MakeDirectories(all,$(SUBS))
+#endif
+
+LIBFOBJS =	xgfinterface.o xginitf.o
+
+LIBCOBJS = 	xgcrosshair.o xginitc.o xginitvar.o xgpaint2d.o xgpaint3d.o \
+		xgpaintvec.o xgpixmap.o xgprint.o xgsetup.o xgcommands.o \
+		xgreadrit.o xgrescale.o xgprintgif.o xgmovie.o
+
+LIBNOXOBJS = 	xgmovie.o xgreadrit.o xgnox.o
+
+
+PS6TO1OBJS =	ps6to1.o
+
+DEFINES = ${SYSTEM_DEFINES} ${XPM_DEFINE} ${TCL_TK_DEFINES}
+
+EXTRA_INCLUDES = -I$(TCL_H) -I$(TK_H) -I$(X_H)
+EXTRA_DEFINES  = -DXGTCL=\"$(DESTDIR)$(XGPATH)\"
+
+all::	xgscalar.h
+
+xgscalar.h: xgscalar.h.in
+	cat xgscalar.h.in > xgscalar.h
+	echo "#define SCALAR $(CSCALAR)" >> xgscalar.h
+	echo "#define SCALAR_CHAR \"$(CSCALAR)\"" >> xgscalar.h
+#ifdef SCALAR_IS_DOUBLE
+	echo "#define XG_SCALAR_DOUBLE" >> xgscalar.h
+#endif
+	echo >> xgscalar.h
+	echo "#endif  // XG_SCALAR_H" >> xgscalar.h
+
+xgfinterface.f:	xgfinterface.f.in
+	sed 's/SCALAR/$(FSCALAR)/g' xgfinterface.f.in > xgfinterface.f
+
+all::	ps6to1$(FILE_EXT)
+
+NormalProgramTarget(ps6to1$(FILE_EXT), $(PS6TO1OBJS), , , )
+
+#ifdef IBMArchitecture
+InstallProgram(ps6to1$(FILE_EXT),$(DESTDIR)/bin)
+#else
+InstallProgram(ps6to1$(FILE_EXT),/bin)
+#endif
+
+NormalLibraryTarget(XGF250$(FILE_EXT), $(LIBFOBJS))
+NormalLibraryTarget(XGC250$(FILE_EXT), $(LIBCOBJS))
+NormalLibraryTarget(XGC250mini$(FILE_EXT), $(LIBNOXOBJS))
+#ifdef IBMArchitecture
+InstallLibrary(XGC250$(FILE_EXT),$(DESTDIR)/lib)
+InstallLibrary(XGF250$(FILE_EXT),$(DESTDIR)/lib)
+InstallLibrary(XGC250mini$(FILE_EXT),$(DESTDIR)/lib)
+#else
+InstallLibrary(XGC250mini$(FILE_EXT),$(XGPATH))
+InstallLibrary(XGC250$(FILE_EXT),$(XGPATH))
+InstallLibrary(XGF250$(FILE_EXT),$(XGPATH))
+InstallNonExecFile(xgrafix.h,/local/include)
+InstallNonExecFile(xgmini.h,/local/include)
+InstallNonExecFile(xgscalar.h,/local/include)
+InstallNonExecFile(xgrafix.ico,$(XGPATH))
+InstallNonExecFile(xgsetup250.tcl,$(XGPATH))
+InstallNonExecFile(xginit250.tcl,$(XGPATH))
+InstallNonExecFile(xgdialogs250.tcl,$(XGPATH))
+#endif

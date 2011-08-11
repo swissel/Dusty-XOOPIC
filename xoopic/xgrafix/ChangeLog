@@ -1,0 +1,33 @@
+July 2010: 2.70.1
+changed font to fixed-width since Fedora doesn't have a 'variable' font (?!)
+
+June 2010: Version 2.70
+added 'xgio.h' with XGRead/Write to installed files
+
+2009:
+fixed build issues with gcc >= 4.2
+fixed deprecated behavior causing massive warnings (calling func expecting char* with string literal)
+fixed bug preventing load from multiple dump files, made by MPI.
+
+----
+
+* Fixed the problem happening when closing windows using windowmanager button
+
+Version 2.40
+
+* -u n option added, simulation will do n XGMainLoops for every graphics
+   update
+
+* Postscript lines thickened.
+
+Version 2.30 with FORTRAN port
+
+* Added a FORTRAN port and ftest directory
+
+* Input files do not have to end with the .inp extension
+
+* Imakeflag added to compile under Tcl7.4/Tk4.0 or Tcl7.5/Tk4.1
+
+* print option changed from ps to eps
+
+* small enhancements to tcl scripts

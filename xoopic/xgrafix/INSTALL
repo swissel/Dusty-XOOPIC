@@ -1,0 +1,13 @@
+Typically one does 
+
+  sh run_conf.sh
+  make
+  make install
+
+This puts the files in the standard directories and it
+uses double for all real numbers.  If you do not like
+the options specified by run_conf.sh, then do
+
+  ./configure --help
+
+to see what options are possible and choose as you wish.

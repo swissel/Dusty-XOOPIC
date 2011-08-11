@@ -1,0 +1,91 @@
+
+line plot/scatter plot:
+
+INT (type)
+LABEL
+FLOAT (current time)
+INT (number points)
+INT (Color)
+FLOAT  (x value)
+FLOAT  (y value)
+....
+INT (number points)
+INT (color)
+FLOAT
+FLOAT 
+...
+
+0  (terminating ints)
+0  (terminating ints)
+
+3D scatter plot:
+INT (type)
+LABEL
+FLOAT (current time)
+INT (number points)
+FLOAT (x value)
+FLOAT (y value)
+FLOAT (z value)
+
+3DIRREGULAR plot:
+
+INT (type)
+LABEL
+FLOAT(current time)
+INT (N dimension)
+INT (M dimension)
+FLOAT (x value)
+FLOAT (y value)
+FLOAT (z value)
+
+
+3D surface plot:
+INT (type)
+LABEL
+FLOAT(current time)
+INT (N dimension)
+INT (M dimension)
+M FLOAT (x values)
+N FLOAT (y values)
+N*M FLOAT (z values) (column major)
+
+2D Vector plot:
+INT (type)
+LABEL
+FLOAT(current time)
+INT (N dimension)
+INT (M dimension)
+M FLOAT (x values)
+N FLOAT (y values)
+M FLOAT (N w values, one column) 
+M FLOAT (N z values, one column)
+... (until all columns)
+
+LABEL:
+
+Size1
+X-label
+Size2
+Y-label
+Size3
+Z-label
+xscale
+xmin
+xmax
+int Xauto
+yscale
+ymin
+ymax
+int Yauto
+zscale
+zmin
+zmax
+int Zauto
+
+Structure:
+INT npoints (-1 means no more structures in the file)
+INT fill-flag (0 filled, 1 hollow)
+INT lineColor
+INT fillColor
+N FLOAT (x values)
+N FLOAT (y values)

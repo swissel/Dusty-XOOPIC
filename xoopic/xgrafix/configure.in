@@ -1,0 +1,399 @@
+dnl ######################################################################
+dnl
+dnl File:       XGRAFIX configure.in
+dnl
+dnl Purpose:    input file for autoconf for making configure
+dnl
+dnl Version:    $Id: configure.in 132 2006-07-21 23:54:28Z rmtrines $
+dnl
+dnl ######################################################################
+
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(src/xgsetup.c)
+AC_CONFIG_AUX_DIR(./config)
+AM_INIT_AUTOMAKE(xgrafix, 2.x)
+AM_CONFIG_HEADER(./config.h)
+abs_top_builddir=`pwd`
+AC_SUBST(abs_top_builddir)
+abs_top_srcdir=`dirname $0`
+cd $abs_top_srcdir
+abs_top_srcdir=`pwd`
+XGRAFIX_TOP_SRCDIR=$abs_top_srcdir
+AC_SUBST(XGRAFIX_TOP_SRCDIR)
+cd $abs_top_builddir
+
+# try to turn off auto-invocation of autotools in the top-level Makefile
+AM_MAINTAINER_MODE
+
+# Default prefix
+AC_PREFIX_DEFAULT(/usr/local/xgrafix)
+
+dnl ######################################################################
+dnl
+dnl Use wrapped automake
+dnl
+dnl ######################################################################
+
+# See whether we have automake
+amver=`automake --version 2>/dev/null`
+if test $? != 0; then
+  echo automake not present in your path.
+  echo Modifications to Makefile.am\'s will not propagate.
+else
+  AUTOMAKE=$abs_top_srcdir/config/automake.sh
+fi
+# For backward compatibility
+EXEEXT=""
+AC_SUBST(EXEEXT)
+
+dnl ######################################################################
+dnl
+dnl Standard tests
+dnl
+dnl ######################################################################
+
+AC_CANONICAL_HOST
+hosttype=$host
+AC_DEFINE_UNQUOTED(HOSTTYPE, "$host")
+
+dnl ######################################################################
+dnl
+dnl Choose C and C++ compilers
+dnl
+dnl ######################################################################
+
+# If the user specifies nothing, then we default to g++/gcc, allowing the
+# user's path to determine which version.
+CXX=g++
+CC=gcc
+
+# Allow user to override choice of compiler
+AC_ARG_WITH(CXX,[  --with-CXX=<compiler>   to use <compiler> (CC, cxx, KCC) instead of g++],CXX="$withval",CXX=$CXX)
+echo Using C++ compiler $CXX
+export CXX
+AC_ARG_WITH(CC,[  --with-CC=<compiler>    to use <compiler> (cc) instead of gcc],CC="$withval",CC=$CC)
+echo Using C compiler $CC
+export CC
+
+dnl ######################################################################
+dnl
+dnl Standard tests
+dnl
+dnl ######################################################################
+
+AC_ISC_POSIX
+AC_HEADER_TIME
+
+dnl ######################################################################
+dnl
+dnl Auxiliary compilation flags
+dnl
+dnl ######################################################################
+
+# Need BSD compatible nm
+builtin(include,config/nm.m4)
+builtin(include,config/flags.m4)
+# AC_ARG_WITH(CXXOPTIFLAGS,[  --with-CXXOPTIFLAGS=<optimization flags> (e.g. -O)],CXXOPTIFLAGS="$withval",CXXOPTIFLAGS=$CXXOPTIFLAGS)
+CXXFLAGS="$CXXFLAGS $CXX_OPTIFLAGS"
+CFLAGS="$CFLAGS $C_OPTIFLAGS"
+# Add link flags
+builtin(include,config/libs.m4)
+
+dnl ######################################################################
+dnl
+dnl Allow for extra flags
+dnl
+dnl ######################################################################
+
+# Check for extra flags
+AC_ARG_WITH(EXTRA_CXXFLAGS,[  --with-EXTRA_CXXFLAGS=<flags>   to add <flags> to c++ compilation], EXTRA_CXXFLAGS="$with
+val",EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS")
+CXXFLAGS="$CXXFLAGS $EXTRA_CXXFLAGS $MPI_CXXFLAGS"
+# echo CXXFLAGS= $CXXFLAGS
+CFLAGS="$CFLAGS $MPI_CXXFLAGS"
+AC_ARG_WITH(EXTRA_LDFLAGS,[  --with-EXTRA_LDFLAGS=<flags>    to add <flags> to linking], EXTRA_LDFLAGS="$withval",EXTRA_LDFLAGS="$EXTRA_LDFLAGS")
+LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
+dnl AC_SUBST(LDFLAGS)
+
+dnl ######################################################################
+dnl
+dnl Check for C, C++ compilers
+dnl
+dnl ######################################################################
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_CPP
+AC_PROG_CXXCPP
+
+dnl ######################################################################
+dnl
+dnl Check for header files
+dnl
+dnl ######################################################################
+
+dnl AC_LANG_SAVE
+dnl AC_LANG_CPLUSPLUS
+dnl AC_CHECK_HEADERS(iostream strstream fstream sstream)
+dnl AC_LANG_RESTORE
+
+dnl ######################################################################
+dnl
+dnl Check for typedefs, structures, and compiler characteristics
+dnl
+dnl ######################################################################
+
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+
+dnl ######################################################################
+dnl
+dnl C++ compiler capabilities
+dnl
+dnl ######################################################################
+
+dnl echo Calling config/macros.m4
+builtin(include,config/macros.m4)
+dnl echo Calling config/cxx.m4
+builtin(include,config/cxx.m4)
+dnl echo config/cxx.m4 finished
+
+dnl ######################################################################
+dnl
+dnl Find F77 compiler
+dnl
+dnl ######################################################################
+
+# Allow user to turn off fortran
+AC_ARG_ENABLE(fortran,[  --disable-fortran to skip fortran libraries], 
+[ case "${enableval}" in
+  yes) BUILD_FORTRAN=true ;;
+  no)  BUILD_FORTRAN=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-fortran) ;;
+esac 
+],
+BUILD_FORTRAN=false;
+)
+
+if test $BUILD_FORTRAN = true; then
+# Put in a guess
+  F77C=g77
+  FTEST_DIR=ftest
+  builtin(include,./config/f77.m4)
+  builtin(include,./config/f77flags.m4)
+  builtin(include,./config/f77interop.m4)
+else
+  AC_MSG_WARN(Fortran libraries will be invalid.)
+fi
+export F77
+AC_SUBST(F77)
+export FTEST_DIR
+AC_SUBST(FTEST_DIR)
+
+dnl ######################################################################
+dnl
+dnl Check for programs
+dnl
+dnl ######################################################################
+
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+dnl ######################################################################
+dnl
+dnl Find out what the library suffix is
+dnl
+dnl ######################################################################
+
+AC_MSG_CHECKING(what the library suffix is)
+AC_SUBST(LIBEXT)
+if test -z "$LIBEXT"
+then
+    LIBEXT=".a"
+fi
+AC_MSG_RESULT($LIBEXT)
+
+dnl ######################################################################
+dnl
+dnl Find out how to install libraries
+dnl
+dnl ######################################################################
+
+AC_MSG_CHECKING(how to install libraries)
+AC_SUBST(INSTALL_LIBRARY)
+if test -z "$INSTALL_LIBRARY"
+then
+    if test "$LIBEXT" = ".sl" # HP needs executable shared libs
+    then
+        INSTALL_LIBRARY="$INSTALL_PROGRAM"
+    else
+        INSTALL_LIBRARY="$INSTALL_DATA"
+    fi
+else
+    INSTALL_LIBRARY="$INSTALL_DATA"
+fi
+AC_MSG_RESULT(with $INSTALL_LIBRARY)
+
+dnl ######################################################################
+dnl
+dnl X11 
+dnl
+dnl ######################################################################
+builtin(include,config/x11.m4)
+
+dnl ######################################################################
+dnl
+dnl find XPM and set flags
+dnl
+dnl ######################################################################
+
+builtin(include,config/xpm.m4)
+if test -n "$XPM_LIBDIR"; then
+  CFLAGS="$CFLAGS -DXPMENABLED"
+fi
+
+
+dnl ######################################################################
+dnl
+dnl find Tcl/TK
+dnl
+dnl ######################################################################
+
+builtin(include,config/tcltk.m4)
+AC_MSG_CHECKING(for tcltk define flag)
+if test $TCL_MAJOR_VERSION -lt 7; then
+  AC_MSG_ERROR(tcl must be version 7 or greater)
+elif test $TCL_MAJOR_VERSION = 7; then
+  if test $TCL_MINOR_VERSION -lt 5; then
+    CFLAGS="$CFLAGS -DTcl74_Tk40"
+    AC_MSG_RESULT(-DTcl74_Tk40)
+  else
+    CFLAGS="$CFLAGS -DTcl75_Tk41"
+    AC_MSG_RESULT(-DTcl75_Tk41)
+  fi
+else
+  CFLAGS="$CFLAGS -DTcl75_Tk41"
+  AC_MSG_RESULT(-DTcl75_Tk41)
+fi
+
+dnl ######################################################################
+dnl 
+dnl find convert
+dnl
+dnl ######################################################################
+HAVE_CONVERT=""
+AC_ARG_WITH(convert,[  --with-convert=<location of convert> ],CONVERT_BIN_CHECK="$withval",
+CONVERT_BIN_CHECK="")
+
+if test -z "$CONVERT_BIN_CHECK"; then
+  CONVERT_PATH_CHECK=""
+  CONVERT_BIN="convert"
+else
+  CONVERT_PATH_CHECK=`dirname $CONVERT_BIN_CHECK`
+  CONVERT_BIN=`basename $CONVERT_BIN_CHECK`
+fi
+AC_PATH_PROGS(CONVERT_PATH, $CONVERT_BIN, "", $CONVERT_PATH_CHECK:$PATH)
+if test ! -z "$CONVERT_PATH"; then
+  HAVE_CONVERT="-DHAVE_CONVERT"
+  CFLAGS="$CFLAGS $HAVE_CONVERT"
+else
+  AC_MSG_WARN(Unable to find convert in your path.  
+Images will not be able to be saved in .png format!)
+fi
+
+AC_SUBST(HAVE_CONVERT)
+
+dnl ######################################################################
+dnl
+dnl find libpng
+dnl
+dnl ######################################################################
+HAVE_PNG=""
+PATH_CHECK="/usr/X11R6/lib:/usr/openwin/lib:/usr/lib:/lib:/usr/local/lib:$PATH"
+AC_PATH_PROGS(LIBPNG_PATH, libpng.a, "", $PATH_CHECK)
+if test -z "$LIBPNG_PATH"; then
+  AC_PATH_PROGS(LIBPNG_PATH, libpng.so, "", $PATH_CHECK)
+fi
+if test ! -z "$LIBPNG_PATH"; then
+  HAVE_PNG="-DHAVE_CONVERT"
+  CFLAGS="$CFLAGS $HAVE_CONVERT"
+fi
+AC_SUBST(HAVE_PNG)
+
+dnl ######################################################################
+dnl
+dnl SCALAR defines
+dnl
+dnl ######################################################################
+
+# Make sure subdir exists
+if test -z "$SCALAR"; then
+AC_ARG_WITH(SCALAR,[  --with-SCALAR=double    to use have scalars be doubles],SCALAR="$withval",SCALAR=float)
+fi
+cat $abs_top_srcdir/src/xgscalar.h.in > $abs_top_srcdir/src/xgscalar.h
+echo >>$abs_top_srcdir/src/xgscalar.h
+
+if test -z "$F77" || test "`basename $F77`" = "gfortran"; then
+  sed 's/INTRINSIC/*/g' $abs_top_srcdir/src/xgfinterface.f.in > $abs_top_srcdir/src/xgfinterface.f.in.2
+else
+  sed 's/INTRINSIC//g' $abs_top_srcdir/src/xgfinterface.f.in > $abs_top_srcdir/src/xgfinterface.f.in.2
+fi
+
+case $SCALAR in
+
+  float)
+    echo "#define SCALAR float" >> $abs_top_srcdir/src/xgscalar.h
+    echo "#define SCALAR_CHAR \"float\"" >> $abs_top_srcdir/src/xgscalar.h
+    sed 's/SCALAR/REAL/g' $abs_top_srcdir/src/xgfinterface.f.in.2 > $abs_top_srcdir/src/xgfinterface.f
+    sed 's/SCALAR/REAL/g' $abs_top_srcdir/ftest/test.f.in | sed 's/ext//g' > $abs_top_srcdir/ftest/test.f
+    ;;
+
+  double)
+    echo "#define SCALAR double" >> $abs_top_srcdir/src/xgscalar.h
+    echo "#define SCALAR_CHAR \"double\"" >> $abs_top_srcdir/src/xgscalar.h
+    echo "#define XG_SCALAR_DOUBLE" >> $abs_top_srcdir/src/xgscalar.h
+    sed 's/SCALAR/DOUBLE\ PRECISION/g' $abs_top_srcdir/src/xgfinterface.f.in.2 > $abs_top_srcdir/src/xgfinterface.f
+    sed 's/SCALAR/DOUBLE\ PRECISION/g' $abs_top_srcdir/ftest/test.f.in | sed 's/ext/D0/g' > $abs_top_srcdir/ftest/test.f
+    ;;
+
+  *)
+    AC_MSG_ERROR(--with-SCALAR must be either float or double.)
+    ;;
+
+esac
+rm -f $abs_top_srcdir/src/xgfinterface.f.in.2
+echo >>$abs_top_srcdir/src/xgscalar.h
+echo "#endif  // XG_SCALAR_H" >> $abs_top_srcdir/src/xgscalar.h
+dnl if test $SCALAR = double; then
+dnl  AC_DEFINE(SCALAR_IS_DOUBLE)
+dnl fi
+dnl CFLAGS="$CFLAGS -DSCALAR_IS_DOUBLE"
+
+
+dnl ######################################################################
+dnl
+dnl Add in the .depend files.
+dnl
+dnl ######################################################################
+
+touch src/.depend
+
+dnl ######################################################################
+dnl
+dnl Make all the Makefile's
+dnl
+dnl ######################################################################
+
+echo Making Makefiles
+
+AC_OUTPUT(
+config/Makefile
+src/Makefile
+xgmovie/Makefile
+ctest/Makefile
+ftest/Makefile
+Makefile
+)

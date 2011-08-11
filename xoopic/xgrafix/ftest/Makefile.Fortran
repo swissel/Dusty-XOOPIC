@@ -1,0 +1,62 @@
+##
+##	TEST Makefile (Revise according to your system) 
+##
+FILE_EXT = 
+##
+EXEC=	xftest$(FILE_EXT)
+##
+CC = gcc
+##
+##		C compiler.  Normally cc or gcc.
+##
+FC = f77
+##
+##		FORTRAN compiler.  Normally f77
+##
+CFLAGS= -g
+FFLAGS= -g
+##
+##	Flags used for compiling.  -O for optimization, which is optional.
+##	If the X11 include files are not located in /usr/include/X11, you
+##	must specify the directory as a flag prefixed by -I.  For instance, 
+##	if the include files for X11 are located in /usr/local/include, the 
+##	flag -I/usr/local/include must also be passed.
+##
+##LIBS  = -Wl,-L../src,-L/usr/X11/lib,-L/usr/local/lib/tk4.0,-L/usr/lib/tcl7.4\
+##         -lXGF220 -lXGC220 -ltk4.0 -ltcl7.4 -lXpm -lX11 -lm
+LIBS  = -L../src -L/usr/X11/lib -L/usr/local/lib/tk4.0 -L/usr/local/lib/tcl7.4\
+       -lXGF250 -lXGC250 -ltk -ltcl -lXpm -lX11 -lm -ldl
+##
+##Libraries and their directories used in loading.  Normal is -lm and -lX11
+##	for the Math and X11 libraries, which is NOT optional.  On Unicos, -lnet
+##	is also used.  If the X11 libraries are not located in /usr/lib/X11, you
+##	must also specify the directory as a flag prefixed by -L.  For instance,
+##	if the include files for X11 are located in /usr/local/lib, the flag
+##	-L/usr/local/lib must also be passed.  You must also specify where 
+##      xgrafix library is located.  Here we assume that it was installed in
+##      you home directory in $(HOME)/xgrafix/lib.  If your system admin. has
+##      installed the xgrafix library in /usr/lib, you won't need to specify
+##      the location of the library.
+##
+##
+TESTOBJ=	extra.o test.o 
+##
+##
+all:	$(TESTOBJ) $(EXEC)
+
+test.f:	test.f.in
+	if test -n "`grep float ../src/xgscalar.h | grep define`"; then \
+	   sed 's/SCALAR/REAL/g' test.f.in | sed 's/ext//g' > test.f ; \
+	else sed 's/SCALAR/DOUBLE\ PRECISION/g' test.f.in | sed 's/ext//g' > test.f ; fi
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c -I/usr/local/include
+
+.f.o:
+	$(FC) -c $(FFLAGS) $*.f
+
+$(EXEC):	$(TESTOBJ)
+		$(FC) $(FFLAGS) -o $(EXEC) $(TESTOBJ) $(LIBS)
+
+clean:
+	@rm *.o *~ *.BAK

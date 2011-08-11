@@ -1,0 +1,15 @@
+
+
+
+Sample input file for xgmreduce:
+****************************
+1e-11 100000 2 2 1
+sample 1 100
+END
+*************************
+
+timestep maxlinearplotlength timereduce xreduce yreduce
+bxgfile_name xloc_on_screen yloc_on_screen
+END
+
+*****************************
