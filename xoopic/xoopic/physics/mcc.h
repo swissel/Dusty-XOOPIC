@@ -28,7 +28,6 @@ collisions by operating on ParticleGroups.
 #include "sptlrgn.h"
 #include "ngd.h"
 #include <oops.h>
-#include "dd.h"
 
  
 class Maxwellian;
