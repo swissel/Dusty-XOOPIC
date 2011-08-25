@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include "speciesvarg.h"
-SpeciesVarParams::SpeciesVarParams():SpeciesParams()//unclear : ParameterGroup()
+SpeciesVarParams::SpeciesVarParams():SpeciesParams()
 {   r.setNameAndDescription("r", "radius (meters)");
 	r.setValue(".000001");
     parameterList.add(&r);

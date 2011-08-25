@@ -19,7 +19,10 @@ Revision History
 #include "speciesvar.h"
 #include "particlevar.h"
 
-
+/**
+ * A subclass of ParticleGroup designed to model dust particles with radius
+ *and variable charge with appropriate advance method with fixed gravity.
+ */
 class ParticleGroupVAR : public ParticleGroup
 {
 	Scalar* q;

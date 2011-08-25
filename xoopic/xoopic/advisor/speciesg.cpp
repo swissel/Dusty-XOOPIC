@@ -26,7 +26,8 @@ SpeciesParams::SpeciesParams() : ParameterGroup()
 	speciesName.setValue("NULL");
 	parameterList.add(&speciesName);
 	q.setNameAndDescription("q", "charge (C)");
-//	q.setValue("1.60206e-19"); allow variable
+//	q.setValue("1.60206e-19");
+    /// removed to allow variable charge J.B. 08/11
 	parameterList.add(&q);
 	m.setNameAndDescription("m", "mass (kg)");
 	m.setValue("9.1093897e-31");

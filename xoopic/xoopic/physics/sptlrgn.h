@@ -207,7 +207,7 @@ long unsigned int getShiftNum() { return shiftNum;};
   Fields* get_fields(){return fields;} //added by kc (1-27-95)
   int   getmaxN() {return maxN;}  //added by kc (1-23-95)
   void addParticleList(ParticleList& particleList); //added by kc (1-23-95)
-  void addParticleVarList(ParticleVarList& particleList);//unnecessary for dust
+    void addParticleVarList(ParticleVarList& particleList);///unnecessary, intended for dust J.B. 08/11
   void packParticleGroups(int i);
   Scalar** get_halfCellVolumes() {return grid->get_halfCellVolumes();}
   Scalar**	getRho() {return fields->getrho();}
