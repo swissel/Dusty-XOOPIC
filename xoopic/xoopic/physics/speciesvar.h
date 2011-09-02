@@ -12,6 +12,10 @@
 #include "species.h"
 #include <iostream>
 
+/**
+ * A subclass of Species designed to model dust particles with radius
+ *and variable charge.
+ */
 
 class SpeciesVar : public Species {
 	Scalar r;

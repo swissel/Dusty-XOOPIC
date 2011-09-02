@@ -79,7 +79,9 @@ class ParticleGroup
 
   BOOL synchRadiationOn;
 
-public:
+public:/**
+        modified to have a Boolean flag for dust and to allow for variable charge J.B. 08/11
+        */
   ParticleGroup(int maxN, Species* s, Scalar np2c0, BOOL vary_np2c = FALSE,BOOL _dust=false);
   virtual ~ParticleGroup();
   BOOL add(const Vector2& x, const Vector3& u, Scalar np2c=0); // add a single particle

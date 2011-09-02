@@ -339,7 +339,8 @@ SpatialRegionList* AdvisorManager::createDevice()
   	setProgress(1, "Creating AdvisorManger::SpeciesParam");
 #endif
       for (spIter.restart(); !spIter.Done(); spIter++)
-          if (spIter.current()->get_speciesName()==ostring("dust")) {
+          if (spIter.current()->get_speciesName()==ostring("dust"))///to make sure dust is added correctly as a SpeciesVar J.B. 08/11 
+          {
               SpeciesVarParams* spv=dynamic_cast<SpeciesVarParams*>(spIter.current());
               speciesList->add(spv->createCounterPart());
 
@@ -462,7 +463,7 @@ ostring AdvisorManager::readSpecies(ifstream& fin)
 	}
 	return ostring(buffer);
 }
-ostring AdvisorManager::readSpeciesVar(ifstream& fin)//dust
+ostring AdvisorManager::readSpeciesVar(ifstream& fin)/// for dust, initializes SpeciesVarParams J.B. 08/11
 {
 	char buffer[512];
 	SpeciesVarParams* speciesParams = new SpeciesVarParams();

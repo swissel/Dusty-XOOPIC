@@ -1143,7 +1143,7 @@ void Fields::collect_charge_to_grid(ParticleGroup *group,Scalar **_rho)
       kx = x[i].e2();
       j = (int)jx; k=(int)kx;  //get the integer part
       jx -= j; kx -= k;  //get the fractional part only
-      if (group->vary_np2c()||group->get_dust()) q = group->get_q(i);
+      if (group->vary_np2c()||group->get_dust()) q = group->get_q(i);///dust option added J.B. 08/11
       _rho[j][k] += (1-jx)*(1-kx)*q;
       _rho[j][k+1] += (1-jx)*(kx)*q;
       _rho[j+1][k] += (jx)*(1-kx)*q;

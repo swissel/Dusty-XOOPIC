@@ -107,7 +107,7 @@ Scalar iCrossSection::sigma(Scalar energy)
 	return a + b/(sqrt(energy) + 1E-30);
 }
 //-------------------------------------------------------------------
-//dCrossSection methods, the crosssections in ArMCC can't be accessed by dCrossSection
+///dCrossSection methods, the crosssections in ArMCC can't be accessed by dCrossSection
 
 Scalar dCrossSection::sigmaDelastic(Scalar energy,Scalar q)// dust elastic from chutov
 {
@@ -316,7 +316,7 @@ MCCPackage::MCCPackage(GAS_TYPE _type, const ostring& strGasType,
 }
 
 void MCCPackage::init(SpeciesList& _sList, Scalar _dt)
-{//bulk of method moved to collideto be evaluated every time
+{///bulk of method moved to collide to be evaluated every time J.B. 8/11
     sList=_sList;
     if (gasDensity > 0) {
         extra = new Scalar[sList.nItems()];
@@ -383,6 +383,7 @@ void MCCPackage::addCrossSections()
 
 void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
   throw(Oops){
+      // moved from init J.B. 8/11
       if (gasDensity > 0) {
           // eEnergyScale = fabs(0.5/eSpecies->get_q_over_m());
           // iEnergyScale = fabs(0.5/iSpecies->get_q_over_m());
@@ -407,7 +408,9 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                       if (!dust) {
                           collProb[id] = 1 - exp(-gasDensity*maxSigmaVe*dt*sIter()->get_subcycleIndex()
                                                  /sIter()->get_supercycleIndex());
-                      } else {
+                      } else 
+                      //dust, calculate max collisional probability with dust
+                      {
                           maxSigmaVe=sumSigmaVe()+sumdSigmaVe();
                           collProb[id] = 1 - exp(((-gasDensity*sumSigmaVe())+sumdSigmaVe()*get_dust_density_MAX())*dt*sIter()->get_subcycleIndex()
                                                  /sIter()->get_supercycleIndex());
@@ -419,7 +422,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                       if (!dust)
                           collProb[id] = 1 - exp(-gasDensity*maxSigmaVi*dt*sIter()->get_subcycleIndex()
                                                  /sIter()->get_supercycleIndex());
-                      else
+                      else//dust, calculate max collisional probability with dust
                       {
                           maxSigmaVi=sumSigmaVi()+sumdSigmaVi();
                           collProb[id] = 1 - exp(((-gasDensity*sumSigmaVi())+sumdSigmaVi()*get_dust_density_MAX())*dt*sIter()->get_subcycleIndex()
@@ -432,7 +435,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
           
       }
       else extra = collProb = NULL;
-//original start of method
+//original start of method J.B. 8/11
   if (pgList.isEmpty() || !collProb) return;
   
   // return if simulation time is not within the specified time interval
@@ -460,7 +463,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
   
   // number of potential collisions is n times the max. collision prob.
 
-  ///cout << "n = " << n << endl;
+  //cout << "n = " << n << endl;
   extra[id] += n * collProb[id];
   int nCollisions = (int)extra[id];
   extra[id] -= nCollisions;
@@ -587,7 +590,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                     oops2.prepend("MCCPackage::collide: Error: \n");//OK
                     throw oops2;
                 }
-                ///sumSigma += icxFactor*eCX[i]->sigma(energy);	
+                //sumSigma += icxFactor*eCX[i]->sigma(energy);	
                 if (random <= sumSigma)
                 {
                     dynamic(*eCX[i]);
@@ -595,7 +598,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                 }
             }
         }
-        else//dust
+        else//dust, try collisions with dust, but null collisional method needs to be fixed J.B. 8/11
         {
             for (int i=0; i<niCX; i++)
             {
@@ -628,7 +631,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                         throw oops2;
                         
                     }
-                    ///sumSigma += icxFactor*eCX[i]->sigma(energy);	
+                    //sumSigma += icxFactor*eCX[i]->sigma(energy);	
                 }
                     if (random <= sumSigma) 
                     {
@@ -657,7 +660,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
           oops2.prepend("MCCPackage::collide: Error: \n");//OK
           throw oops2;
              }
-        ///sumSigma += icxFactor*iCX[i]->sigma(energy);	
+        //sumSigma += icxFactor*iCX[i]->sigma(energy);	
 		  if (random <= sumSigma)
           {
 			 dynamic(*iCX[i]);
@@ -665,7 +668,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
 		  }
          }
         }
-        else//dust
+        else//dust, try collisions with dust J.B. 8/11
         {
             for (int i=0; i<niCX; i++)
             {
@@ -698,7 +701,7 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
                         throw oops2;
                     }
                 }
-                ///sumSigma += icxFactor*iCX[i]->sigma(energy);	
+                //sumSigma += icxFactor*iCX[i]->sigma(energy);	
                 if (random <= sumSigma) 
                         {
                     dynamic(*iCX[i]);
@@ -756,7 +759,7 @@ Scalar MCCPackage::sumSigmaVi()
   maxSigmaVi *= icxFactor/sqrt(iEnergyScale);
   return maxSigmaVi;
 }
-// compute null (max) cross section for e-dust collisions
+/// compute null (max) cross section for e-dust collisions
 Scalar MCCPackage::sumdSigmaVe()
 {
     maxSigmaVe = 0;
@@ -777,7 +780,7 @@ Scalar MCCPackage::sumdSigmaVe()
     return maxSigmaVe;
 }
 
-// compute null (max) cross section for ion-dust collisions
+/// compute null (max) cross section for ion-dust collisions
 Scalar MCCPackage::sumdSigmaVi()
 {
     maxSigmaVi = 0;
@@ -800,7 +803,7 @@ Scalar MCCPackage::sumdSigmaVi()
     return maxSigmaVi;
 }
 
-void MCCPackage::dynamic(CrossSection& cx)
+void MCCPackage::dynamic(CrossSection& cx)/// edited for dust
 throw(Oops){
   switch(cx.get_type()) 
 	 {
@@ -958,9 +961,9 @@ void MCCPackage::ionization(CrossSection& cx)
   
   // This is the new relativistic algorithm
   
-  /// All new ionization/gas code implemented above is repeated below.
-  /// Eventually, the nonrelativistic code above will go away.
-  /// --- Let's put the relevant code into helper functions. ---
+  // All new ionization/gas code implemented above is repeated below.
+  // Eventually, the nonrelativistic code above will go away.
+  // --- Let's put the relevant code into helper functions. ---
 
   else {
 
@@ -1733,7 +1736,7 @@ ArMCC::ArMCC(Scalar p, Scalar temp, Species* eSpecies, Species* iSpecies,
 void ArMCC::addCrossSections()
 {
     neCX = 3;  
-           if(dust)
+           if(dust)// for dust, since it has more collisions J.B. 08/11
             neCX+=2;
  // electron model
   eCX = new CrossSection*[neCX];
@@ -1764,7 +1767,7 @@ void ArMCC::addCrossSections()
   iCX[0] = new FuncCrossSection(sigmaIelastic, 18, 0.0, CrossSection::ION_ELASTIC);
   iCX[1] = new FuncCrossSection(sigmaCX, 18, 0.0, CrossSection::CHARGE_EXCHANGE);
 
-            if(dust)
+            if(dust)// important, initializes cross sections for dust J.B. 08/11
             {
                 iCX[2]= new  dCrossSection(r, CrossSection::DUST_DEPOSITION_ION);
                 iCX[3]= new  dCrossSection(r, CrossSection::DUST_ELASTIC_ION);

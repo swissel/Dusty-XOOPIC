@@ -46,7 +46,7 @@ class SpatialRegionGroup: public ParameterGroup
   oopicList<DiagnosticParams> Probes;
   oopicList<SpatialRegionBoundary> SpatialRegionBoundaryList;
   ostring readSpecies(std::ifstream& fin); 
-  ostring readSpeciesVar(std::ifstream& fin); 
+    ostring readSpeciesVar(std::ifstream& fin); ///calls same function in advisman for dust to initialize SpeciesVarParams J.B. 08/11
   AdvisorManager* advisorp;
   StringParameter Name;
  public:
