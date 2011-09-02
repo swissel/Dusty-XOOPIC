@@ -28,7 +28,6 @@ collisions by operating on ParticleGroups.
 #include "sptlrgn.h"
 #include "ngd.h"
 #include <oops.h>
-#include "dd.h"
 
  
 class Maxwellian;
@@ -116,11 +115,13 @@ public:
 	virtual Scalar	sigma(Scalar energy);
 };
 
-
-class dCrossSection:public CrossSection //dust
+/**
+ For dust contains sigma functions and includes radius paramater and charge parameter for collisions J.B. 08/11
+ */
+class dCrossSection:public CrossSection 
 {
     Scalar r; //radius
-    \
+    
 public:
     dCrossSection(Scalar _r, Type _type)
     {
@@ -239,7 +240,7 @@ class MCCPackage : public BaseMCPackage
   int ionzFraction;    // fraction of particles to create in ionization event
   Scalar	eEnergyScale;		//	m/2e (converts (m/s)^2 -> eV)
   Scalar	iEnergyScale;		//	M/2e
-  void newVelocity(Scalar energy, Scalar v, Vector3& u, BOOL eFlag,BOOL iondustflag=0,BOOL electrondustflag=0);
+  void newVelocity(Scalar energy, Scalar v, Vector3& u, BOOL eFlag,BOOL iondustflag=0,BOOL electrondustflag=0);/// edited to allow for dust collisions, additions not completed J.B. 8/11
   Scalar sumSigmaVe();    // returns MAX(sigma*ve)
   Scalar sumSigmaVi();    // returns MAX(sigma*vi)
     Scalar sumdSigmaVi();//same for dust
@@ -350,9 +351,10 @@ class MCCPackage : public BaseMCPackage
    */
   Vector3 newMomentum(const Vector3 U_initial, const Scalar& energy,
                       const Scalar& theta, const Scalar& phi);
+    /// the following protected members are for dust, containing charge, density,radius, mass, species id, and charge/dust ratios J.B. 08/11
     bool dust;
     Scalar r,mdust;   
-    int d;
+    int d;//dust species id
     Scalar** dustchargedensity;
     Scalar maxdustchargedensity;
     Scalar mindustchargedensity;
@@ -388,12 +390,15 @@ class MCCPackage : public BaseMCPackage
   virtual void ionization(CrossSection& cx) throw(Oops);
   virtual void ionElastic(CrossSection& cx);
   virtual void chargeExchange(CrossSection& cx);
-  virtual void dustDepositionIon(CrossSection& cx); 
-  virtual void dustDepositionElectron(CrossSection& cx);
-  virtual void dustElasticIon(CrossSection& cx);
-  virtual void dustElasticElectron(CrossSection& cx);   
+  virtual void dustDepositionIon(CrossSection& cx); ///for dust, not completed
+  virtual void dustDepositionElectron(CrossSection& cx);///for dust, not completed
+  virtual void dustElasticIon(CrossSection& cx);///for dust, not completed
+  virtual void dustElasticElectron(CrossSection& cx);  ///for dust, not completed 
   virtual void setRelativisticMCC(int flag) {relativisticMCC = flag;}
   virtual int  getRelativisticMCC()  {return relativisticMCC;}
+    SpeciesList sList;
+    Scalar dt;
+    /// the following  members are accessors for previous membersfor dust, containing charge, density,radius, mass, species id, and charge/dust ratios J.B. 08/11
     Scalar** get_dust_density();// at every grid point
     Scalar get_dust_density_MAX();//for null collision technique
     Scalar get_rho_dust_MAX();//for null collision technique dust scattering and electron deposition, needs to be fixed to represent per volume, not per grid element
@@ -401,8 +406,7 @@ class MCCPackage : public BaseMCPackage
     Scalar get_dust_average_charge_per_particle(int j, int k);//at each grid point, don't  use broken
     Scalar** get_dust_average_charge_per_particle();// at every grid point
     Scalar** get_dust_average_chargesquared_per_particle();// for elastic collision
-    SpeciesList sList;
-    Scalar dt;
+
 };
 
 

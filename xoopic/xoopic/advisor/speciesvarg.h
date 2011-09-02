@@ -10,7 +10,9 @@
 #define _speciesvarg_h
 #include "speciesg.h"
 #include "speciesvar.h"
-
+/**
+Holds paramaters for SpeciesVar for dust
+*/
 class SpeciesVarParams:public SpeciesParams
 {
     ScalarParameter r;

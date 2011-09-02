@@ -565,7 +565,8 @@ void SpatialRegion::addParticleList(ParticleList& particleList)
           oopicListIter<ParticleGroup> pgIter(*particleGroupList[s]);
           for (pgIter.restart(); !pgIter.Done(); pgIter++)
           {
-              if (p->get_speciesPtr()->get_dust()&&pgIter()->get_dust()) {
+              if (p->get_speciesPtr()->get_dust()&&pgIter()->get_dust()) ///dust capability J.B. 08/11
+              {
                   ParticleGroupVAR* pgdust=dynamic_cast<ParticleGroupVAR*> (pgIter());
                 if (pgdust->add(p->get_x(), p->get_u(), p->get_np2c(),p->get_q())) break;
               } else {
@@ -610,8 +611,7 @@ void SpatialRegion::addParticleList(ParticleList& particleList)
 
 
 }
-void SpatialRegion::addParticleVarList(ParticleVarList& particleList)//unnecessary for dust
-{
+void SpatialRegion::addParticleVarList(ParticleVarList& particleList){
     // empty Particle list into available ParticleGroups
     oopicListIter<ParticleVar> pIter(particleList);
     for (pIter.restart(); !pIter.Done(); pIter++)

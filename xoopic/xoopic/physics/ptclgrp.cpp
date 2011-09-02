@@ -53,7 +53,8 @@ ParticleGroup::ParticleGroup(int _maxN, Species* s, Scalar _np2c0,
 	np2c0 = _np2c0;
     dust =_dust;
 	species = s;
-	if (!(species->get_dust())) {
+	if (!(species->get_dust()))///makes sure dust doesn't get set charge J.B. 08/11
+    {
 		q_over_m = species->get_q_over_m();
 		q = np2c0*species->get_q();
 	}

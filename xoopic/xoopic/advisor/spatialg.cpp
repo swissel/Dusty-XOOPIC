@@ -84,7 +84,7 @@ ostring SpatialRegionGroup::CreateParamGroup(ifstream &fin, ostring &groupname)
     message = PGP.InitializeFromStream(fin);
  else if (groupname == (ostring)"Species")
     message = readSpecies(fin);
- else if (groupname == (ostring)"SpeciesVar")
+ else if (groupname == (ostring)"SpeciesVar")///for dust J.B. 08/11
      message = readSpeciesVar(fin);
  else if (groupname == (ostring)"MCC")
     message = AddMCCParamsList(fin);
