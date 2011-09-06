@@ -1552,10 +1552,9 @@ void MCCPackage::newVelocity(Scalar energy, Scalar v, Vector3& u, bool eFlag,BOO
 Scalar MCCPackage::get_rho_dust_MAX()//for null collision technique
 {         
     dustchargedensity=((region->get_rho_species())[d]);
-    maxdustchargedensity=0;
     for (int j=0; j < region->getJ(); j++) {
         for (int k=0; k < region->getK(); k++){ 
-            if ( dustchargedensity[j][k] > maxdustchargedensity ) {
+            if (( dustchargedensity[j][k] > maxdustchargedensity)||(j==0&&k==0) ) {
                 maxdustchargedensity= dustchargedensity[j][k];
             }
         }
@@ -1568,10 +1567,9 @@ Scalar MCCPackage::get_rho_dust_MAX()//for null collision technique
 Scalar MCCPackage::get_rho_dust_MIN()//for null collision technique
 {         
     dustchargedensity=((region->get_rho_species())[d]);
-    mindustchargedensity=0;
     for (int j=0; j <= region->getJ(); j++) {
         for (int k=0; k <= region->getK(); k++){ 
-            if ( dustchargedensity[j][k] < mindustchargedensity ) {
+            if ( (dustchargedensity[j][k] < mindustchargedensity)||(j==0&&k==0) ) {
                 mindustchargedensity= dustchargedensity[j][k];
             }
         }
@@ -1702,10 +1700,11 @@ Scalar** MCCPackage::get_dust_density()
 Scalar MCCPackage::get_dust_density_MAX()//for null collision technique
 {
     get_dust_density();
+    Scalar  maxdustdensity;
     for (int j=0; j <= region->getJ(); j++) {
         for (int k=0; k <= region->getK(); k++){ 
             if ( dustdensity[j][k] > maxdustdensity ) {
-                Scalar  maxdustdensity= dustdensity[j][k];
+                  maxdustdensity= dustdensity[j][k];
             }
         }
     }
