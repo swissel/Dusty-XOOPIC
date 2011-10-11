@@ -107,8 +107,9 @@ Scalar iCrossSection::sigma(Scalar energy)
 	return a + b/(sqrt(energy) + 1E-30);
 }
 //-------------------------------------------------------------------
-///dCrossSection methods, the crosssections in ArMCC can't be accessed by dCrossSection
-
+/**dCrossSection methods, the crosssections in ArMCC can't be accessed by 
+ *dCrossSection
+*/
 Scalar dCrossSection::sigmaDelastic(Scalar energy,Scalar q)// dust elastic from chutov
 {
     Scalar logcoulomb=10;//coulomb logarithm estimation
@@ -722,8 +723,8 @@ void MCCPackage::collide(ParticleGroupList& pgList, ParticleList& _pList)
   return;
 }
 
-// compute null (max) cross section for e-neutral collisions
-Scalar MCCPackage::sumSigmaVe()
+Scalar MCCPackage::sumSigmaVe()/// compute null (max) cross section for e-neutral collisions
+
 {
   maxSigmaVe = 0;
   for (Scalar energy=0; energy<MAX_ENERGY; energy+=0.5) 
@@ -740,8 +741,8 @@ Scalar MCCPackage::sumSigmaVe()
   return maxSigmaVe;
 }
 
-// compute null (max) cross section for ion-neutral collisions
-Scalar MCCPackage::sumSigmaVi()
+Scalar MCCPackage::sumSigmaVi()/// compute null (max) cross section for ion-neutral collisions
+
 {
   maxSigmaVi = 0;
   for (Scalar energy=0; energy<MAX_ENERGY; energy+=0.5) 
@@ -759,8 +760,8 @@ Scalar MCCPackage::sumSigmaVi()
   maxSigmaVi *= icxFactor/sqrt(iEnergyScale);
   return maxSigmaVi;
 }
-/// compute null (max) cross section for e-dust collisions
-Scalar MCCPackage::sumdSigmaVe()
+Scalar MCCPackage::sumdSigmaVe()/// compute null (max) cross section for e-dust collisions
+
 {
     maxSigmaVe = 0;
     for (Scalar energy=0; energy<MAX_ENERGY; energy+=0.5) 
@@ -780,8 +781,8 @@ Scalar MCCPackage::sumdSigmaVe()
     return maxSigmaVe;
 }
 
-/// compute null (max) cross section for ion-dust collisions
-Scalar MCCPackage::sumdSigmaVi()
+Scalar MCCPackage::sumdSigmaVi()/// compute null (max) cross section for ion-dust collisions
+
 {
     maxSigmaVi = 0;
     for (Scalar energy=0; energy<MAX_ENERGY; energy+=0.5) 
@@ -1127,7 +1128,7 @@ void MCCPackage::dustDepositionIon(CrossSection& cx)
 //pg->remove(index);
 }
 
-void MCCPackage::dustElasticElectron(CrossSection& cx)//copied from elastic ion-gas
+void MCCPackage::dustElasticElectron(CrossSection& cx)///copied from elastic ion-gas
 { 	// This is the original, nonrelativistic algorithm
    // if (relativisticMCC == 0) {
         u /= (v+1E-30); // normalize
@@ -1149,7 +1150,7 @@ void MCCPackage::dustElasticElectron(CrossSection& cx)//copied from elastic ion-
 	}*/
 }
 
-void MCCPackage::dustElasticIon(CrossSection& cx)//copied from elastic ion-gas
+void MCCPackage::dustElasticIon(CrossSection& cx)///copied from elastic ion-gas
 { 	// This is the original, nonrelativistic algorithm
    // if (relativisticMCC == 0) {
         u /= (v+1E-30); // normalize
@@ -1508,6 +1509,8 @@ void MCCPackage::newVelocity(Scalar energy, Scalar v, Vector3& u, bool eFlag,BOO
 
 	// johnv: does this get called for ion collisions?
     Scalar me,mi;
+    
+    //following beginning of attempt to modify for dust, not completed J.B. 10/11
     if (iondustflag) {
         me = iSpecies->get_m();
         mi = mdust;
@@ -1552,10 +1555,9 @@ void MCCPackage::newVelocity(Scalar energy, Scalar v, Vector3& u, bool eFlag,BOO
 Scalar MCCPackage::get_rho_dust_MAX()//for null collision technique
 {         
     dustchargedensity=((region->get_rho_species())[d]);
-    maxdustchargedensity=0;
     for (int j=0; j < region->getJ(); j++) {
         for (int k=0; k < region->getK(); k++){ 
-            if ( dustchargedensity[j][k] > maxdustchargedensity ) {
+            if (( dustchargedensity[j][k] > maxdustchargedensity)||(j==0&&k==0) ) {
                 maxdustchargedensity= dustchargedensity[j][k];
             }
         }
@@ -1565,13 +1567,12 @@ Scalar MCCPackage::get_rho_dust_MAX()//for null collision technique
     
 }
 
-Scalar MCCPackage::get_rho_dust_MIN()//for null collision technique
+Scalar MCCPackage::get_rho_dust_MIN()///for null collision technique
 {         
     dustchargedensity=((region->get_rho_species())[d]);
-    mindustchargedensity=0;
     for (int j=0; j <= region->getJ(); j++) {
         for (int k=0; k <= region->getK(); k++){ 
-            if ( dustchargedensity[j][k] < mindustchargedensity ) {
+            if ( (dustchargedensity[j][k] < mindustchargedensity)||(j==0&&k==0) ) {
                 mindustchargedensity= dustchargedensity[j][k];
             }
         }
@@ -1583,7 +1584,7 @@ Scalar MCCPackage::get_rho_dust_MIN()//for null collision technique
 
 Scalar MCCPackage::get_dust_average_charge_per_particle(int j, int k)
 {
-    get_rho_dust_MIN();// calculate dustchargedensity
+    get_rho_dust_MIN();/// calculate dustchargedensity
     return (dustchargedensity[j][k]/get_dust_density()[j][k]);
 }
 Scalar** MCCPackage::get_dust_average_charge_per_particle()
@@ -1699,13 +1700,14 @@ Scalar** MCCPackage::get_dust_density()
     
 }
 
-Scalar MCCPackage::get_dust_density_MAX()//for null collision technique
+Scalar MCCPackage::get_dust_density_MAX()///for null collision technique
 {
     get_dust_density();
+    Scalar  maxdustdensity;
     for (int j=0; j <= region->getJ(); j++) {
         for (int k=0; k <= region->getK(); k++){ 
             if ( dustdensity[j][k] > maxdustdensity ) {
-                Scalar  maxdustdensity= dustdensity[j][k];
+                  maxdustdensity= dustdensity[j][k];
             }
         }
     }
