@@ -565,7 +565,7 @@ void SpatialRegion::addParticleList(ParticleList& particleList)
           oopicListIter<ParticleGroup> pgIter(*particleGroupList[s]);
           for (pgIter.restart(); !pgIter.Done(); pgIter++)
           {
-              if (p->get_speciesPtr()->get_dust()&&pgIter()->get_dust()) ///dust capability J.B. 08/11
+              if (p->get_speciesPtr()->get_dust()&&pgIter()->get_dust()) ///dust capability added J.B. 08/11
               {
                   ParticleGroupVAR* pgdust=dynamic_cast<ParticleGroupVAR*> (pgIter());
                 if (pgdust->add(p->get_x(), p->get_u(), p->get_np2c(),p->get_q())) break;

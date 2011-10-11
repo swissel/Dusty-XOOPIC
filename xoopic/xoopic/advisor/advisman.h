@@ -67,6 +67,9 @@ public:
 	BOOL KnownBoundary(ostring &s);
 	BOOL KnownSpecies(ostring &speciesName);
 	ostring readSpecies(std::ifstream& fin);
+    /**
+     *for dust, initializes SpeciesVarParams J.B. 08/11
+     */
     ostring readSpeciesVar(std::ifstream& fin);
 	SpeciesParamsList* get_speciesParamsList() {return speciesParamsList;}
 	SpeciesList* get_speciesList() {return speciesList;}

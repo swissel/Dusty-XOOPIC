@@ -129,7 +129,7 @@ public:
         r=_r;
     }
     virtual Scalar get_r(){return r;}
-    Scalar sigmaDelastic(Scalar energy, Scalar q);//dust
+    Scalar sigmaDelastic(Scalar energy, Scalar q);
     Scalar sigmaDdepositionI(Scalar energy, Scalar q);
     Scalar sigmaDdepositionE(Scalar energy, Scalar q);
     virtual Scalar sigma(Scalar energy, Scalar q)
@@ -240,7 +240,10 @@ class MCCPackage : public BaseMCPackage
   int ionzFraction;    // fraction of particles to create in ionization event
   Scalar	eEnergyScale;		//	m/2e (converts (m/s)^2 -> eV)
   Scalar	iEnergyScale;		//	M/2e
-  void newVelocity(Scalar energy, Scalar v, Vector3& u, BOOL eFlag,BOOL iondustflag=0,BOOL electrondustflag=0);/// edited to allow for dust collisions, additions not completed J.B. 8/11
+    /** edited to allow for dust collisions, additions not completed J.B.
+     *8/11
+     */
+  void newVelocity(Scalar energy, Scalar v, Vector3& u, BOOL eFlag,BOOL iondustflag=0,BOOL electrondustflag=0);
   Scalar sumSigmaVe();    // returns MAX(sigma*ve)
   Scalar sumSigmaVi();    // returns MAX(sigma*vi)
     Scalar sumdSigmaVi();//same for dust
@@ -351,7 +354,9 @@ class MCCPackage : public BaseMCPackage
    */
   Vector3 newMomentum(const Vector3 U_initial, const Scalar& energy,
                       const Scalar& theta, const Scalar& phi);
-    /// the following protected members are for dust, containing charge, density,radius, mass, species id, and charge/dust ratios J.B. 08/11
+    /** the following protected members are for dust, containing charge,
+    *density,radius, mass, species id, and charge/dust ratios J.B. 08/11
+     */
     bool dust;
     Scalar r,mdust;   
     int d;//dust species id
@@ -390,23 +395,33 @@ class MCCPackage : public BaseMCPackage
   virtual void ionization(CrossSection& cx) throw(Oops);
   virtual void ionElastic(CrossSection& cx);
   virtual void chargeExchange(CrossSection& cx);
-  virtual void dustDepositionIon(CrossSection& cx); ///for dust, not completed
-  virtual void dustDepositionElectron(CrossSection& cx);///for dust, not completed
-  virtual void dustElasticIon(CrossSection& cx);///for dust, not completed
-  virtual void dustElasticElectron(CrossSection& cx);  ///for dust, not completed 
+    ///for dust, not completed
+  virtual void dustDepositionIon(CrossSection& cx);
+    ///for dust, not completed
+  virtual void dustDepositionElectron(CrossSection& cx);
+    ///for dust, not completed
+  virtual void dustElasticIon(CrossSection& cx);
+      ///for dust, not completed
+  virtual void dustElasticElectron(CrossSection& cx); 
   virtual void setRelativisticMCC(int flag) {relativisticMCC = flag;}
   virtual int  getRelativisticMCC()  {return relativisticMCC;}
     SpeciesList sList;
     Scalar dt;
-    /// the following  members are accessors for previous membersfor dust, containing charge, density,radius, mass, species id, and charge/dust ratios J.B. 08/11
-    Scalar** get_dust_density();// at every grid point
-    Scalar get_dust_density_MAX();//for null collision technique
-    Scalar get_rho_dust_MAX();//for null collision technique dust scattering and electron deposition, needs to be fixed to represent per volume, not per grid element
-    Scalar get_rho_dust_MIN();//for null collision technique dust ion deposition
-    Scalar get_dust_average_charge_per_particle(int j, int k);//at each grid point, don't  use broken
-    Scalar** get_dust_average_charge_per_particle();// at every grid point
-    Scalar** get_dust_average_chargesquared_per_particle();// for elastic collision
-
+    /// the following  members are accessors for previous members for dust, containing charge, density,radius, mass, species id, and charge/dust ratios J.B. 08/11
+    ///This method gives array for density at every grid point
+    Scalar** get_dust_density();
+    ///for null collision technique
+    Scalar get_dust_density_MAX();
+///for null collision technique dust scattering and electron deposition, needs to be fixed to represent per volume, not per grid element 
+    Scalar get_rho_dust_MAX();
+    ///for null collision technique dust ion deposition
+    Scalar get_rho_dust_MIN();
+    ///at each grid point, don't  use broken
+    Scalar get_dust_average_charge_per_particle(int j, int k);
+    /// at every grid point
+    Scalar** get_dust_average_charge_per_particle();
+    /// for elastic collision
+    Scalar** get_dust_average_chargesquared_per_particle();
 };
 
 
